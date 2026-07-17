@@ -463,42 +463,7 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
         <button class="close-btn-x" onclick="closePanels()">✕</button>
       </div>
 
-      <!-- 운전 변수 -->
-      <div class="sec-label">운전 변수</div>
-      <div class="metric-grid">
-        <div class="metric-card">
-          <div class="mc-label">부하</div>
-          <div class="mc-val" style="color:#2dcfae;" id="mv-mw">218</div>
-          <div class="mc-unit">MW</div>
-        </div>
-        <div class="metric-card">
-          <div class="mc-label">급탄율</div>
-          <div class="mc-val" style="color:#e6edf3;" id="mv-feed">42.3</div>
-          <div class="mc-unit">t/h</div>
-        </div>
-        <div class="metric-card">
-          <div class="mc-label">저널 입력</div>
-          <div class="mc-val" style="color:#e6edf3;" id="mv-journal">8.4</div>
-          <div class="mc-unit">kPa</div>
-        </div>
-        <div class="metric-card">
-          <div class="mc-label">보울 차압</div>
-          <div class="mc-val" style="color:#e6edf3;" id="mv-bowl">142</div>
-          <div class="mc-unit">mmH₂O</div>
-        </div>
-        <div class="metric-card">
-          <div class="mc-label">분급기 속도</div>
-          <div class="mc-val" style="color:#e6edf3;" id="mv-rpm">24.5</div>
-          <div class="mc-unit">rpm</div>
-        </div>
-        <div class="metric-card">
-          <div class="mc-label">AMWI</div>
-          <div class="mc-val" style="color:#f0b429;" id="mv-amwi">0.29</div>
-          <div class="mc-unit">× (주의)</div>
-        </div>
-      </div>
-
-      <!-- 마모/손상 -->
+      <!-- ① 마모 / 손상 (최우선) -->
       <div class="sec-label">마모 / 손상</div>
       <div class="metric-grid">
         <div class="metric-card">
@@ -523,7 +488,7 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
         </div>
       </div>
 
-      <!-- 잔여수명 (RUL) -->
+      <!-- ② 잔여수명(RUL) · 교체 예측 -->
       <div class="sec-label">잔여수명(RUL) · 교체 예측</div>
       <div class="rul-box">
         <div class="rul-label">b-2 롤러 (최소 잔여수명)</div>
@@ -545,14 +510,54 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
         </div>
       </div>
 
-      <!-- 롤별 마모 히트맵 바 (Zone 1~10) -->
-      <div class="sec-label">롤타이어 마모 히트맵 — 위치 1~10</div>
-      <div id="rp-heatmap"></div>
-
       <!-- 경고 -->
-      <div class="warn-box" style="margin-top:10px;">
+      <div class="warn-box" style="margin-top:8px;">
         <div class="warn-title">⚠ b-2 롤러 점검 필요</div>
         <div class="warn-body">Zone 8~10 집중 마모 — 손상도 71% 초과.<br>예상 교체일: 2025-10-20 (현재 기준)</div>
+      </div>
+
+      <!-- ③ 롤별 마모 히트맵 바 (Zone 1~10) -->
+      <div class="sec-label">마모 히트맵 — Zone 1~10</div>
+      <div id="rp-heatmap"></div>
+
+      <!-- ④ 운전 변수 (접기/펼치기) -->
+      <div class="sec-label" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="toggleOpVars()">
+        <span>운전 변수</span>
+        <span id="opvars-arrow" style="font-size:10px;color:#484f58;">▼ 펼치기</span>
+      </div>
+      <div id="opvars-grid" style="display:none;">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <div class="mc-label">부하</div>
+            <div class="mc-val" style="color:#2dcfae;" id="mv-mw">218</div>
+            <div class="mc-unit">MW</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-label">AMWI</div>
+            <div class="mc-val" style="color:#f0b429;" id="mv-amwi">0.29</div>
+            <div class="mc-unit">× (주의)</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-label">급탄율</div>
+            <div class="mc-val" style="color:#e6edf3;" id="mv-feed">42.3</div>
+            <div class="mc-unit">t/h</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-label">저널 입력</div>
+            <div class="mc-val" style="color:#e6edf3;" id="mv-journal">8.4</div>
+            <div class="mc-unit">kPa</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-label">보울 차압</div>
+            <div class="mc-val" style="color:#e6edf3;" id="mv-bowl">142</div>
+            <div class="mc-unit">mmH₂O</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-label">분급기 속도</div>
+            <div class="mc-val" style="color:#e6edf3;" id="mv-rpm">24.5</div>
+            <div class="mc-unit">rpm</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -659,6 +664,15 @@ function showTip(e,title,body){
 }
 function hideTip(){document.getElementById('tooltip').style.display='none';}
 
+// ── 운전변수 접기/펼치기 ──
+function toggleOpVars(){
+  const grid=document.getElementById('opvars-grid');
+  const arrow=document.getElementById('opvars-arrow');
+  const open=grid.style.display==='none';
+  grid.style.display=open?'block':'none';
+  arrow.textContent=open?'▲ 접기':'▼ 펼치기';
+}
+
 // ── Right panel heatmap bars ──
 function buildRpHeatmap(){
   const el=document.getElementById('rp-heatmap');
@@ -714,20 +728,18 @@ function closePanels(){
   document.querySelectorAll('.part-sel .pbtn').forEach(b=>b.classList.remove('active'));
 }
 
-// ── HTML → Unity 마모 데이터 전송 ──
-// WEAR[b-x][0]=Zone1(내로우끝), [9]=Zone10(와이드끝) (HTML 기준)
-// Unity WearController: ZoneIndex 0=와이드끝(Zone10), 9=내로우끝(Zone1) → 역순 변환
+// ── HTML → Unity 마모 데이터 전송 (롤러별 CSV, JsonUtility 의존 없음) ──
+// HTML WEAR[b-x][0]=Zone1(내로우끝/narrow), [9]=Zone10(와이드끝/wide)
+// Unity ZoneIndex: 0=와이드끝, 9=내로우끝 → 역순 변환 후 0.0~1.0 전달
 var unityInstance = null;
 function sendWearToUnity() {
   if (!unityInstance) return;
-  // HTML Zone1→10 순서를 Unity ZoneIndex 0→9(wide→narrow) 순서로 뒤집어 0~1 범위로 전달
-  function toUnityArr(arr) { return arr.slice().reverse().map(v => v / 100); }
-  const payload = JSON.stringify({
-    r1: toUnityArr(WEAR['b-1']),
-    r2: toUnityArr(WEAR['b-2']),
-    r3: toUnityArr(WEAR['b-3'])
-  });
-  unityInstance.SendMessage('Coal Pulverizer', 'UpdateZoneWear', payload);
+  function toCSV(arr) {
+    return arr.slice().reverse().map(v => (v / 100).toFixed(3)).join(',');
+  }
+  unityInstance.SendMessage('Coal Pulverizer', 'UpdateR1Wear', toCSV(WEAR['b-1']));
+  unityInstance.SendMessage('Coal Pulverizer', 'UpdateR2Wear', toCSV(WEAR['b-2']));
+  unityInstance.SendMessage('Coal Pulverizer', 'UpdateR3Wear', toCSV(WEAR['b-3']));
 }
 
 // ── Unity → HTML 브리지 ──
