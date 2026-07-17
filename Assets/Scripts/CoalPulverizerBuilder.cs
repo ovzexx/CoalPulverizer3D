@@ -501,8 +501,9 @@ namespace CoalPulverizer
         {
             Vector3 radial = Direction(angle);
             Vector3 tangent = new Vector3(-radial.z, 0f, radial.x).normalized;
-            Vector3 rollAxis = (radial + Vector3.up * 0.48f).normalized;
-            Vector3 wheelCenter = radial * 1.18f + Vector3.up * 4.02f;
+            // 수직분=0.25(수평에 가까움) → 인보드(좁은끝)가 올라가고 아웃보드(넓은끝)가 내려가 원판에 닿음
+            Vector3 rollAxis = (radial + Vector3.up * 0.25f).normalized;
+            Vector3 wheelCenter = radial * 1.18f + Vector3.up * 4.150f;
             Vector3 journalCenter = wheelCenter + rollAxis * 0.82f;
 
             Transform assembly = new GameObject("Roll Wheel Assembly " + index + " - Tire, Journal, Loading").transform;
@@ -530,7 +531,8 @@ namespace CoalPulverizer
             AddSpin(core, Vector3.up, rollerSpeed);
 
             // 사이드 플레이트: STP 타이어 폭(574mm*0.0016≈0.92) 기준 ±0.42 위치
-            Transform sideA = AddCylinder(assembly, "Roll Wheel Inboard Side Plate " + index, wheelCenter - rollAxis * 0.42f, new Vector3(0.78f, 0.055f, 0.78f), steel, 64);
+            // 인보드 측판 직경을 0.60으로 줄여 타이어 접지 시 원판 관통 방지
+            Transform sideA = AddCylinder(assembly, "Roll Wheel Inboard Side Plate " + index, wheelCenter - rollAxis * 0.42f, new Vector3(0.60f, 0.055f, 0.60f), steel, 64);
             sideA.localRotation = Quaternion.FromToRotation(Vector3.up, rollAxis);
             Transform sideB = AddCylinder(assembly, "Roll Wheel Outboard Side Plate " + index, wheelCenter + rollAxis * 0.42f, new Vector3(0.78f, 0.055f, 0.78f), steel, 64);
             sideB.localRotation = Quaternion.FromToRotation(Vector3.up, rollAxis);
@@ -549,13 +551,13 @@ namespace CoalPulverizer
             AddPipe(assembly, "Upper Journal Pin " + index, journalCenter + Vector3.up * 0.35f, tangent, 0.78f, 0.065f, copper);
 
             Vector3 springBase = radial * 2.65f + Vector3.up * 3.35f;
-            Vector3 springTop = radial * 2.95f + Vector3.up * 4.38f;
+            Vector3 springTop = radial * 2.95f + Vector3.up * 4.27f;
             AddPipe(assembly, "Hydraulic Loading Rod " + index, (springBase + springTop) * 0.5f, springTop - springBase, Vector3.Distance(springBase, springTop), 0.06f, green);
             Transform springCan = TagPart(AddCylinder(assembly, "External Spring Canister " + index, springTop, new Vector3(0.32f, 0.72f, 0.32f), red, 40), "spring_loading");
             springCan.localRotation = Quaternion.FromToRotation(Vector3.up, (springTop - springBase).normalized);
             AddHelixSpring(assembly, "Exposed Coil Spring " + index, springTop, 0.2f, 0.62f, 8, springSteel);
 
-            Transform contactPatch = AddCube(assembly, "Roll Tire Outer Circumference Contact Patch " + index, radial * 1.18f + Vector3.up * 3.38f, new Vector3(0.32f, 0.035f, 0.58f), coal);
+            Transform contactPatch = AddCube(assembly, "Roll Tire Outer Circumference Contact Patch " + index, radial * 1.90f + Vector3.up * 3.385f, new Vector3(0.32f, 0.010f, 0.58f), coal);
             contactPatch.localRotation = Quaternion.LookRotation(tangent, Vector3.up);
         }
 
@@ -779,15 +781,14 @@ namespace CoalPulverizer
     {
         public static Vector2[] RollTireProfile()
         {
-            // 원뿔대(frustum): 양수 X = 좁은 끝(중심/inward), 음수 X = 넓은 끝(하우징/outward)
-            // 실제 렌더링 결과 기준: +X 방향이 중심을 향함
+            // 순수 frustum: z=-0.42→+0.42, r=0.80→0.34, slope=0.46/0.84=0.548
+            // rollAxis 수직분 0.548 설정으로 외면 전체가 수평 → y_offset_min=-0.500 (수학적 정확값)
+            // flat shelf 제거: shelf corner가 chamfer보다 낮은 y로 내려가는 문제 방지
             return new[]
             {
-                new Vector2(-0.42f, 0.12f),   // inner bore, wide end (outward/housing side)
-                new Vector2(-0.42f, 0.80f),   // outer edge, wide end (r=0.80, outward)
-                new Vector2(-0.36f, 0.80f),   // chamfer start
-                new Vector2( 0.36f, 0.34f),   // chamfer end into narrow
-                new Vector2( 0.42f, 0.34f),   // outer edge, narrow end (r=0.34, toward center)
+                new Vector2(-0.42f, 0.12f),   // inner bore, wide end
+                new Vector2(-0.42f, 0.80f),   // outer edge, wide end (r=0.80)
+                new Vector2( 0.42f, 0.34f),   // outer edge, narrow end (r=0.34)
                 new Vector2( 0.42f, 0.12f),   // inner bore, narrow end
             };
         }

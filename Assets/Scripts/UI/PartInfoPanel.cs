@@ -23,10 +23,20 @@ namespace CoalPulverizer.UI
 
         private void Awake()
         {
-            Canvas canvas = GetComponent<Canvas>() ?? GetComponentInParent<Canvas>(true);
+            Canvas canvas = GetComponent<Canvas>()
+                         ?? GetComponentInParent<Canvas>(true)
+                         ?? FindFirstObjectByType<Canvas>();
             Debug.Log($"[PartInfoPanel] Awake — canvas={canvas != null}");
-            if (canvas != null)
-                Build(canvas);
+            if (canvas == null)
+            {
+                Debug.LogError("[PartInfoPanel] No Canvas found! UI will not build.");
+                return;
+            }
+            try { Build(canvas); }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[PartInfoPanel] Build() failed: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public void Build(Canvas canvas)
@@ -109,7 +119,7 @@ namespace CoalPulverizer.UI
             wearRt.anchorMax        = new Vector2(1, 1);
             wearRt.pivot            = new Vector2(0.5f, 1);
             wearRt.anchoredPosition = new Vector2(0, wearTop);
-            wearRt.sizeDelta        = new Vector2(0, 200f);
+            wearRt.sizeDelta        = new Vector2(0, 260f);
             _wearPanel = wearGo.AddComponent<WearPanel>();
             _wearPanel.Build(wearRt);
 
@@ -123,14 +133,27 @@ namespace CoalPulverizer.UI
             Debug.Log($"[PartInfoPanel] Show called — data={data?.KoreanName ?? "NULL"}, _panel={_panel != null}");
             if (data == null) { Hide(); return; }
 
-            _nameKr.text      = data.KoreanName;
-            _nameEn.text      = data.EnglishName;
-            _description.text = data.Description;
-            _specText.text    = data.Specs != null ? "• " + string.Join("\n• ", data.Specs) : "";
-            _blueprint.Highlight(data.BlueprintZone);
-            _wearPanel.Show(data.WearData);
+            if (_panel == null)
+            {
+                Debug.LogError("[PartInfoPanel] _panel is null — Build() was not called or failed!");
+                return;
+            }
 
             if (!_isVisible) SlideIn();
+
+            try
+            {
+                _nameKr.text      = data.KoreanName;
+                _nameEn.text      = data.EnglishName;
+                _description.text = data.Description;
+                _specText.text    = data.Specs != null ? "• " + string.Join("\n• ", data.Specs) : "";
+                _blueprint.Highlight(data.BlueprintZone);
+                _wearPanel.Show(data.WearData);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[PartInfoPanel.Show] Content update failed: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public void Hide(bool instant = false)

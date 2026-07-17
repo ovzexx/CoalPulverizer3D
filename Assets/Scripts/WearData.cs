@@ -16,6 +16,9 @@ namespace CoalPulverizer
         public float WearLimitMm;      // 교체 기준 마모 한계 (mm)
         public float DailyWearRateMm;  // 일일 마모율 (mm/day) — 현재 AMWI 기반 추정
 
+        // 축 방향 10구간 마모도 [0]=와이드끝(하우징), [9]=내로우끝(중심)
+        public float[] ZoneWear = new float[10];
+
         // 파생 프로퍼티
         public float AMWI         => GP * CT * BI * RL;
         public float WearPercent  => Mathf.Clamp01(WornMm / WearLimitMm);

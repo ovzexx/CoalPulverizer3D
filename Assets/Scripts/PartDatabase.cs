@@ -43,6 +43,9 @@ namespace CoalPulverizer
                         WornMm          = 23.4f,
                         WearLimitMm     = 50.0f,
                         DailyWearRateMm = 0.041f,
+                        // [0]=하우징측 분쇄하중 집중 → 마모 심함, [9]=중심측 → 마모 적음
+                        ZoneWear = new float[] { 0.84f, 0.78f, 0.71f, 0.65f, 0.57f,
+                                                 0.48f, 0.40f, 0.33f, 0.25f, 0.18f },
                     },
                 },
                 ["bull_ring"] = new PartData

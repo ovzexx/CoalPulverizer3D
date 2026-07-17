@@ -14,6 +14,7 @@ namespace CoalPulverizer.UI
         private Text  _lifeLabel;
         private readonly List<Image> _factorFills  = new();
         private readonly List<Text>  _factorLabels = new();
+        private readonly Image[] _zoneBlocks = new Image[10];
 
         private static readonly Color ColNormal  = new Color(0.25f, 0.90f, 0.55f);
         private static readonly Color ColWarning = new Color(1.00f, 0.78f, 0.10f);
@@ -55,7 +56,17 @@ namespace CoalPulverizer.UI
             y -= 36f;
 
             // ── 구분선 ──
-            Div(self, y); y -= 10f;
+            Div(self, y); y -= 8f;
+
+            // ── 구간별 마모도 ──
+            MakeText(self, "▪ 구간별 마모도  [하우징 → 중심]", y, 16f, 10, FontStyle.Bold, ColAccent, false);
+            y -= 16f;
+            for (int z = 0; z < 10; z++)
+                _zoneBlocks[z] = MakeZoneBlock(self, z, y);
+            y -= 20f;
+
+            // ── 구분선 ──
+            Div(self, y); y -= 8f;
 
             // ── 누적 마모 헤더 ──
             MakeText(self, "▪ 누적 마모량", y, 16f, 10, FontStyle.Bold, ColAccent, false);
@@ -100,6 +111,16 @@ namespace CoalPulverizer.UI
                 _factorFills[i].fillAmount = vals[i];
                 _factorFills[i].color = c;
                 _factorLabels[i].text = $"{keys[i]}\n{vals[i]:F2}";
+            }
+
+            // 구간별 마모도 블록 갱신
+            if (d.ZoneWear != null)
+            {
+                for (int z = 0; z < 10 && z < d.ZoneWear.Length; z++)
+                {
+                    if (_zoneBlocks[z] != null)
+                        _zoneBlocks[z].color = ZoneColor(d.ZoneWear[z]);
+                }
             }
 
             // 누적 마모 게이지
@@ -214,6 +235,32 @@ namespace CoalPulverizer.UI
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
             t.font = UIFonts.Korean;
             return t;
+        }
+
+        private static Image MakeZoneBlock(RectTransform parent, int zone, float y)
+        {
+            float xMin = zone / 10f, xMax = (zone + 1) / 10f;
+            var go = new GameObject("ZB" + zone, typeof(RectTransform), typeof(Image));
+            var rt = go.GetComponent<RectTransform>();
+            rt.SetParent(parent, false);
+            rt.anchorMin = new Vector2(xMin, 1); rt.anchorMax = new Vector2(xMax, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = new Vector2(0, y);
+            rt.sizeDelta = new Vector2(-2f, 16f);
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0.2f, 0.2f, 0.2f, 0.6f); // 초기 회색
+            return img;
+        }
+
+        private static Color ZoneColor(float w)
+        {
+            w = Mathf.Clamp01(w);
+            Color low  = new Color(1.00f, 0.88f, 0.00f);
+            Color mid  = new Color(1.00f, 0.45f, 0.00f);
+            Color high = new Color(0.96f, 0.14f, 0.14f);
+            return w < 0.5f
+                ? Color.Lerp(low,  mid,  w * 2f)
+                : Color.Lerp(mid,  high, (w - 0.5f) * 2f);
         }
 
         private static void Div(RectTransform parent, float y)
