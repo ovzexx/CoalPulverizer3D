@@ -212,13 +212,19 @@ namespace CoalPulverizer
             AddTag(bowlAssembly, "bowl_table");
             AddSpin(bowlAssembly, Vector3.up, tableSpeed);
 
-            TagPart(AddCylinder(bowlAssembly, "Rotating Throat And Nozzle Ring", new Vector3(0f, 2.72f, 0f), new Vector3(3.0f, 0.22f, 3.0f), yellow, 128), "primary_air");
 
             AddScraperBlades(bowlAssembly, 3, 0.95f, 2.55f);
             // 두 개의 원뿔형 판을 하나의 flat 연삭 원형판으로 통합
             // 롤타이어 접지점 Y≈3.38에 top face가 오도록: center Y=3.14, height=0.26
             // Ring은 Y가 center. top face = 3.25 + 0.13 = 3.38 = 롤타이어 접지 높이
             TagPart(AddRing(bowlAssembly, "Grinding Bowl And Bull Ring Plate", new Vector3(0f, 3.25f, 0f), 2.20f, 0.40f, 0.26f, rubber, 128), "bull_ring");
+            // Bowl Hub 실린더 — 원판 중심에서 아래로 뻗은 중공 관, bowl과 함께 회전 (도면 하부의 뚫린 관)
+            // top Y=3.12 (bowl 링 하단 접합), bottom Y=2.12 (gear reducer 내부로 진입)
+            // Bowl Hub 하단 관 — gear reducer 위에서 bowl body 아래까지 이어지는 중공 실린더
+            TagPart(AddRing(bowlAssembly, "Bowl Hub Cylinder", new Vector3(0f, 2.36f, 0f), 0.60f, 0.30f, 0.48f, steel, 96), "bowl_table");
+            // Bowl Conical Body — hub 상단(r=0.60)에서 bowl 원판 외경(r=2.20)까지 위로 퍼지는 원뿔
+            // bottom Y=2.60, top Y=3.12 (bowl ring 하단과 정합)
+            TagPart(AddCone(bowlAssembly, "Bowl Conical Body", new Vector3(0f, 2.86f, 0f), 0.60f, 2.20f, 0.52f, steel, 128), "bowl_table");
             Transform coalCarrier = new GameObject("Rotating Coal Bed And Raw Coal Particles").transform;
             coalCarrier.SetParent(bowlAssembly, false);
             // 원판 top face = 3.14 + 0.26 = 3.40 에 맞춤
@@ -262,6 +268,11 @@ namespace CoalPulverizer
             AddClassifierBlades(bladeCarrier, 28, 0.78f, 1.04f);
             AddClassifierOutletDiffuser(parent);
             AddRing(parent, "Classifier Fines Discharge Ring", new Vector3(0f, 7.25f, 0f), 1.18f, 0.62f, 0.18f, steel, 128);
+            // Separator Top 연결 콘 — 역원뿔 상단(Y=6.845)에서 사출구 레벨(Y=7.455)까지 끊김 없이 연장
+            // bottomR=1.85 (inner classifier cone 상단과 정합), topR=2.20 (top cover plate 수준)
+            AddCone(parent, "Separator Top Connecting Cone", new Vector3(0f, 7.15f, 0f), 1.85f, 2.20f, 0.61f, yellow, 128);
+            // Separator Top 외부 바디 — housing 상단과 top cover plate 사이 외부 갭 채움
+            AddRing(parent, "Separator Top Outer Body", new Vector3(0f, 6.99f, 0f), 2.28f, 1.90f, 0.60f, steel, 128);
             AddPipe(parent, "Central Raw Coal Feed Pipe From Classifier", new Vector3(0f, 6.62f, 0f), Vector3.up, 2.9f, 0.18f, darkSteel);
         }
 
