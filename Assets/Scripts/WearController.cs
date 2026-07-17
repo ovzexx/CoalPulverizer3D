@@ -63,6 +63,7 @@ namespace CoalPulverizer
                     RollTireZone rtz = go.AddComponent<RollTireZone>();
                     rtz.ZoneIndex = i;
                     _zones[r][i] = rtz;
+                    rtz.Apply(0.45f); // 로드 즉시 주황색으로 표시 (SendMessage 전 가시 확인용)
                 }
             }
         }

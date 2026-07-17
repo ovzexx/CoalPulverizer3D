@@ -831,6 +831,20 @@ setInterval(()=>{
   if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
 },1000);
 
+// ── 모바일 감지: Unity WebGL은 모바일 메모리 한계로 로드 불가 ──
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+if (isMobile) {
+  // Unity 로딩바 숨기고 "PC 전용" 안내 표시
+  document.getElementById('unity-loading-bar').innerHTML =
+    '<div style="color:#484f58;font-size:12px;text-align:center;padding:20px;">3D 모델은 PC 브라우저에서 지원됩니다</div>';
+  document.getElementById('part-sel').style.display = 'flex';
+  // 패널 바로 열기 (Unity 없이)
+  setTimeout(() => {
+    selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
+    buildRpHeatmap(); updateSvgOverlay(); updateZoneList(); buildHeatmap();
+  }, 300);
+}
+
 // ── Unity loader ──
 var canvas=document.querySelector('#unity-canvas');
 function unityShowBanner(msg,type){
@@ -850,6 +864,7 @@ var config={
   showBanner:unityShowBanner
 };
 document.querySelector('#unity-loading-bar').style.display='flex';
+if (!isMobile) {
 var sc=document.createElement('script');
 sc.src=buildUrl+'/unity_webgl.loader.js';
 sc.onload=()=>{
@@ -861,10 +876,11 @@ sc.onload=()=>{
     document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
     document.getElementById('part-sel').style.display='flex';
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
-    setTimeout(sendWearToUnity, 800); // 씬 초기화 완료 후 마모 데이터 전송
+    setTimeout(sendWearToUnity, 800);
   }).catch(console.error);
 };
 document.body.appendChild(sc);
+}
 
 window.addEventListener('resize',()=>{
   if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();

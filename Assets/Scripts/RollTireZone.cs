@@ -43,29 +43,29 @@ namespace CoalPulverizer
 
         private Material BuildTransparentMat()
         {
-            // Unlit 셰이더 사용: 조명 계산 없이 순수 색상만 표시
-            // Lit 셰이더는 씬 포인트 라이트(Grinding Zone Light)를 받아 색이 실제보다
-            // 과장되게 밝아져 타이어 원본 모양이 안 보이는 문제가 있음
+            // 빌드에 포함된 셰이더 우선순위로 탐색
+            // WebGL 빌드에 URP/Unlit이 없는 경우 Standard(항상 포함)로 폴백
             Shader sh = Shader.Find("Universal Render Pipeline/Unlit")
                      ?? Shader.Find("Unlit/Transparent")
-                     ?? Shader.Find("Unlit/Color");
+                     ?? Shader.Find("Unlit/Color")
+                     ?? Shader.Find("Standard");
 
             if (sh == null)
             {
-                Debug.LogWarning("[RollTireZone] No Unlit shader found.");
+                Debug.LogWarning("[RollTireZone] 사용 가능한 셰이더 없음.");
                 return null;
             }
 
             var mat = new Material(sh) { name = "ZoneOverlay_" + ZoneIndex };
 
-            bool isURPUnlit = sh.name.Contains("Universal Render Pipeline");
-            if (isURPUnlit)
+            if (sh.name.Contains("Universal Render Pipeline"))
             {
-                mat.SetFloat("_Surface",   1f); // Transparent
-                mat.SetFloat("_Blend",     0f); // Alpha blend
+                // URP Unlit 투명 설정
+                mat.SetFloat("_Surface",   1f);
+                mat.SetFloat("_Blend",     0f);
                 mat.SetFloat("_AlphaClip", 0f);
                 mat.SetFloat("_ZWrite",    0f);
-                mat.SetFloat("_Cull",      2f); // Back culling
+                mat.SetFloat("_Cull",      2f);
                 mat.SetOverrideTag("RenderType", "Transparent");
                 mat.renderQueue = 3100;
                 mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
@@ -74,9 +74,22 @@ namespace CoalPulverizer
                 mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             }
+            else if (sh.name == "Standard")
+            {
+                // Standard 셰이더 Transparent 모드 설정 (Built-in 파이프라인 호환)
+                mat.SetFloat("_Mode", 3f);  // Transparent
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_ZWrite", 0);
+                mat.DisableKeyword("_ALPHATEST_ON");
+                mat.EnableKeyword("_ALPHABLEND_ON");
+                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                mat.SetOverrideTag("RenderType", "Transparent");
+                mat.renderQueue = 3000;
+            }
             else
             {
-                // Unlit/Transparent 등 기본 유니티 셰이더 폴백
+                // Unlit/Transparent 등 레거시 폴백
                 mat.renderQueue = 3100;
                 mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
