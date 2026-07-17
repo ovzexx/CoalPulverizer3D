@@ -656,6 +656,22 @@ function closePanels(){
   document.querySelectorAll('.part-sel .pbtn').forEach(b=>b.classList.remove('active'));
 }
 
+// ── HTML → Unity 마모 데이터 전송 ──
+// WEAR[b-x][0]=Zone1(내로우끝), [9]=Zone10(와이드끝) (HTML 기준)
+// Unity WearController: ZoneIndex 0=와이드끝(Zone10), 9=내로우끝(Zone1) → 역순 변환
+var unityInstance = null;
+function sendWearToUnity() {
+  if (!unityInstance) return;
+  // HTML Zone1→10 순서를 Unity ZoneIndex 0→9(wide→narrow) 순서로 뒤집어 0~1 범위로 전달
+  function toUnityArr(arr) { return arr.slice().reverse().map(v => v / 100); }
+  const payload = JSON.stringify({
+    r1: toUnityArr(WEAR['b-1']),
+    r2: toUnityArr(WEAR['b-2']),
+    r3: toUnityArr(WEAR['b-3'])
+  });
+  unityInstance.SendMessage('Coal Pulverizer', 'UpdateZoneWear', payload);
+}
+
 // ── Unity → HTML 브리지 ──
 // Unity에서 부품 클릭 시 NotifyPartSelected(partId) jslib → 이 함수 호출
 window.onUnityPartSelected = function(partId) {
@@ -770,10 +786,12 @@ sc.onload=()=>{
   createUnityInstance(canvas,config,p=>{
     document.querySelector('#unity-progress-bar-full').style.width=(100*p)+'%';
   }).then(ui=>{
+    unityInstance=ui;
     document.querySelector('#unity-loading-bar').style.display='none';
     document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
     document.getElementById('part-sel').style.display='flex';
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
+    setTimeout(sendWearToUnity, 800); // 씬 초기화 완료 후 마모 데이터 전송
   }).catch(console.error);
 };
 document.body.appendChild(sc);

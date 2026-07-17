@@ -29,10 +29,10 @@ namespace CoalPulverizer
 
             if (_mat == null) return;
 
-            // 색상을 먼저 설정한 뒤 할당해야 함:
-            // rend.material = mat 은 내부 복사본을 만들므로 이후 mat 수정이 무시됨
             Color c = WearColor(Wear);
-            c.a = Alpha;
+            // 마모율 5% 미만이면 완전 투명 — 초기 "기본" 상태를 깔끔하게 유지
+            float a = Wear < 0.05f ? 0f : Alpha;
+            c.a = a;
             if (_mat.HasProperty("_BaseColor")) _mat.SetColor("_BaseColor", c);
             if (_mat.HasProperty("_Color"))     _mat.SetColor("_Color",     c);
             _mat.color = c;

@@ -535,6 +535,7 @@ namespace CoalPulverizer
             }
             AddSpin(tire, Vector3.up, rollerSpeed);
             TagPart(tire, "roll_assembly");
+            AddWearZoneOverlays(tire, index);
 
             // STP 보어 r=133.5mm → Unity 스케일 후 ≈0.21. 코어는 보어 안에 들어가야 하므로 r<0.21
             Transform core = AddCylinder(assembly, "Roll Wheel Web And Core " + index, wheelCenter, new Vector3(0.38f, 0.88f, 0.38f), ceramic, 96);
@@ -586,6 +587,40 @@ namespace CoalPulverizer
             obj.AddComponent<MeshFilter>().sharedMesh = mesh;
             obj.AddComponent<MeshRenderer>().sharedMaterial = mat;
             return obj.transform;
+        }
+
+        // 롤타이어 표면에 10개 반투명 Zone 오버레이 링 추가 (형상 변경 없음)
+        private static void AddWearZoneOverlays(Transform tireTf, int rollIndex)
+        {
+            const int N       = 10;
+            const float zWide = -0.42f;  // 타이어 로컬 Y: 와이드끝(Zone10)
+            const float zNarr =  0.42f;  // 타이어 로컬 Y: 내로우끝(Zone1)
+            const float rWide =  0.80f;  // 외면 반경 at 와이드끝
+            const float rNarr =  0.34f;  // 외면 반경 at 내로우끝
+            const float eps   =  0.018f; // z-fighting 방지용 반경 여유
+
+            float zRange = zNarr - zWide;  // 0.84
+            float rRange = rWide - rNarr;  // 0.46
+            float zoneH  = zRange / N;     // 0.084
+
+            for (int i = 0; i < N; i++)
+            {
+                // i=0: ZoneIndex 0 = 와이드끝(Zone10), i=9: ZoneIndex 9 = 내로우끝(Zone1)
+                float zCenter = zWide + (i + 0.5f) * zoneH;
+                float rBot    = rWide -  i      * (rRange / N) + eps;
+                float rTop    = rWide - (i + 1) * (rRange / N) + eps;
+
+                GameObject go = new GameObject($"WearZone_R{rollIndex}_Z{i}");
+                go.transform.SetParent(tireTf, false);
+                go.transform.localPosition = new Vector3(0f, zCenter, 0f);
+
+                go.AddComponent<MeshFilter>().sharedMesh = MeshFactory.Frustum(rBot, rTop, zoneH, 48);
+                go.AddComponent<MeshRenderer>();
+
+                RollTireZone rtz = go.AddComponent<RollTireZone>();
+                rtz.ZoneIndex = i;
+                rtz.Wear = 0f;
+            }
         }
 
         private Transform AddLathe(Transform parent, string name, Vector3 pos, Vector2[] profile, Material mat, int segments)

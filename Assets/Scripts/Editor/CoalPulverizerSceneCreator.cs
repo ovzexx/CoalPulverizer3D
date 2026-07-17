@@ -56,6 +56,7 @@ namespace CoalPulverizerEditor
             // ── 인터랙션 시스템 ──────────────────────────────────────
             root.AddComponent<PartHighlighter>();
             root.AddComponent<PartSelector>();
+            root.AddComponent<WearController>();
 
             // UI 패널은 HTML 프론트엔드에서 처리 — Unity Canvas 불필요
 
