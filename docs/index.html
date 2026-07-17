@@ -63,8 +63,28 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
 /* ── Right panel ── */
 .right-panel{width:0;flex-shrink:0;background:#161b22;border-left:1px solid #30363d;overflow:hidden;transition:width .35s cubic-bezier(.25,.46,.45,.94);}
-.right-panel.open{width:296px;}
-.rp-inner{width:296px;height:100%;overflow-y:auto;padding:14px;}
+.right-panel.open{width:310px;}
+.rp-inner{width:310px;height:100%;overflow-y:auto;padding:14px;}
+
+/* Wear heatmap bars (right panel) */
+.hm-bar-row{margin-bottom:10px;}
+.hm-bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:#8b949e;margin-bottom:3px;}
+.hm-bar-track{display:flex;gap:2px;height:14px;}
+.hm-bar-seg{flex:1;border-radius:2px;cursor:pointer;transition:opacity .15s;}
+.hm-bar-seg:hover{opacity:.75;}
+
+/* Metric grid (2-col) */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+.metric-card{background:#21262d;border-radius:7px;padding:7px 9px;}
+.mc-label{font-size:9px;color:#8b949e;margin-bottom:1px;}
+.mc-val{font-size:16px;font-weight:800;line-height:1.1;}
+.mc-unit{font-size:9px;color:#8b949e;}
+
+/* RUL box */
+.rul-box{background:#1a2535;border:1px solid #2a4a6a;border-radius:8px;padding:9px 11px;margin-top:2px;}
+.rul-label{font-size:10px;color:#4a8aaa;margin-bottom:4px;font-weight:600;}
+.rul-val{font-size:20px;font-weight:800;color:#2dcfae;line-height:1;}
+.rul-sub{font-size:9px;color:#6a8aaa;margin-top:2px;}
 .rp-inner::-webkit-scrollbar{width:4px;}
 .rp-inner::-webkit-scrollbar-track{background:#0d1117;}
 .rp-inner::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px;}
@@ -238,28 +258,16 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
                 <rect width="760" height="215" fill="url(#egrid)"/>
 
                 <!-- ══════════════════════════════════════════════════════
-                     LEFT CONTEXT: 볼 허브 원뿔 (내측 — 위로 갈수록 넓어짐)
-                     접촉면(y=157)에서 좁고, 위로 갈수록(y=25) 넓어지는 원뿔
+                     LEFT CONTEXT: 볼 허브 원뿔 단면 (역삼각형)
+                     중심축(좌)에서 위로 갈수록 우측으로 넓어지는 원뿔 반단면
                 ══════════════════════════════════════════════════════ -->
-                <!-- 원뿔 본체 fill -->
-                <polygon points="8,25 183,25 183,157 75,157"
-                  fill="url(#ctx-hatch)"/>
-                <!-- 원뿔 외곽선 -->
-                <line x1="75" y1="157" x2="8" y2="25" stroke="#6a8aaa" stroke-width="1.5"/>   <!-- 좌측 경사면 (원뿔 외면) -->
-                <line x1="8" y1="25" x2="183" y2="25" stroke="#6a8aaa" stroke-width="1.5"/>   <!-- 상단면 -->
-                <line x1="183" y1="25" x2="183" y2="157" stroke="#6a8aaa" stroke-width="1"/>   <!-- 우측면 (롤타이어 내면과 접하는 쪽) -->
-                <!-- 접촉면 연장선 (볼 표면) -->
-                <line x1="8" y1="157" x2="183" y2="157" stroke="#5a7a9a" stroke-width="1" stroke-dasharray="4,3"/>
-                <!-- 중심축 표시 (수직 점선) -->
-                <line x1="8" y1="10" x2="8" y2="170" stroke="#3a5a7a" stroke-width="1" stroke-dasharray="6,4"/>
-                <text x="8" y="8" fill="#3a6a9a" font-size="8" text-anchor="middle">⌀</text>
-                <!-- 볼허브 레이블 -->
-                <text x="82" y="60" fill="#8ab0cc" font-size="9" font-weight="bold" text-anchor="middle" transform="rotate(-52,82,60)">볼 허브 원뿔</text>
-                <text x="55" y="175" fill="#6a8aaa" font-size="8" text-anchor="middle">Bowl Hub</text>
-                <text x="55" y="185" fill="#6a8aaa" font-size="8" text-anchor="middle">내측 (중앙)</text>
-                <!-- 위로 넓어짐 화살표 -->
-                <line x1="40" y1="145" x2="25" y2="55" stroke="#4a7a9a" stroke-width=".8" marker-end="url(#arr)"/>
-                <text x="15" y="100" fill="#4a7a9a" font-size="7.5" text-anchor="middle" transform="rotate(-65,15,100)">넓어짐 ↑</text>
+                <!-- 중심축 (수직 점선) -->
+                <line x1="8" y1="10" x2="8" y2="175" stroke="#3a5a7a" stroke-width="1" stroke-dasharray="6,4"/>
+                <!-- 역삼각형 본체 (wide at top, tip at bottom-left = center axis) -->
+                <polygon points="8,25 183,25 8,157"
+                  fill="url(#ctx-hatch)" stroke="#6a8aaa" stroke-width="1.5"/>
+                <!-- 레이블 -->
+                <text x="72" y="185" fill="#6a8aaa" font-size="8" text-anchor="middle">Bowl Hub (내측)</text>
 
                 <!-- ══════════════════════════════════════════════════════
                      ROLL TIRE BODY (frustum cross-section)
@@ -307,18 +315,18 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
                 <text x="375" y="182" fill="#e8a020" font-size="8.5" text-anchor="middle">접촉면 / Contact Face (분쇄 구역)</text>
 
                 <!-- ══════════════════════════════════════════════════════
-                     RIGHT CONTEXT: 압력 하우징 벽체 (외측)
+                     RIGHT CONTEXT: 압력 하우징 벽체 (외측) — Zone 10과 간격 확보
                 ══════════════════════════════════════════════════════ -->
-                <rect x="568" y="22" width="52" height="142"
+                <rect x="600" y="22" width="52" height="142"
                   fill="url(#ctx-hatch)" stroke="#6a8aaa" stroke-width="1.5"/>
                 <!-- 내벽 강조선 -->
-                <line x1="568" y1="22" x2="568" y2="164" stroke="#8aaabb" stroke-width="2"/>
-                <!-- 하우징 레이블 -->
-                <text x="594" y="185" fill="#6a8aaa" font-size="8" text-anchor="middle">Housing</text>
-                <text x="594" y="195" fill="#6a8aaa" font-size="8" text-anchor="middle">외측 벽체</text>
-                <!-- 화살표: 하우징쪽 방향 -->
-                <line x1="566" y1="93" x2="600" y2="93" stroke="#4a7a9a" stroke-width=".8"/>
-                <text x="635" y="96" fill="#4a7a9a" font-size="8">→ 외측</text>
+                <line x1="600" y1="22" x2="600" y2="164" stroke="#8aaabb" stroke-width="2"/>
+                <!-- 갭 영역 (클리어런스) -->
+                <text x="582" y="185" fill="#6a8aaa" font-size="8" text-anchor="middle">Housing</text>
+                <text x="582" y="195" fill="#6a8aaa" font-size="8" text-anchor="middle">외측 벽체</text>
+                <!-- 화살표: 클리어런스 표시 -->
+                <line x1="567" y1="93" x2="598" y2="93" stroke="#4a7a9a" stroke-width=".8" marker-end="url(#arr)" marker-start="url(#arr2)"/>
+                <text x="582" y="88" fill="#4a7a9a" font-size="7.5" text-anchor="middle">클리어런스</text>
 
                 <!-- ── 전체 폭 치수선 ── -->
                 <line x1="185" y1="12" x2="565" y2="12" stroke="#30363d" stroke-width=".8" marker-end="url(#arr)" marker-start="url(#arr2)"/>
@@ -393,64 +401,101 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
     <div class="rp-inner">
 
       <div class="sec-hdr">
-        <div class="panel-title"><div class="title-bar"></div>롤 타이어 정보</div>
+        <div class="panel-title"><div class="title-bar"></div>롤 타이어 — 상태·마모</div>
         <button class="close-btn-x" onclick="closePanels()">✕</button>
       </div>
 
-      <div class="sec-label">기본 정보</div>
-      <div class="info-row"><span class="il">부품명</span><span class="iv">롤 타이어 (Roll Tire)</span></div>
-      <div class="info-row"><span class="il">재질</span><span class="iv">고크롬 합금강</span></div>
-      <div class="info-row"><span class="il">구간 수</span><span class="iv">10 Zone</span></div>
-      <div class="info-row"><span class="il">롤러 수</span><span class="iv">3개 (b-1, b-2, b-3)</span></div>
-      <div class="info-row"><span class="il">설계 수명</span><span class="iv">8,000 hr</span></div>
-
-      <div class="sec-label">롤러별 마모 상태</div>
-      <div class="roller-cards">
-
-        <div class="rc sel" id="rc-b1" onclick="rpSelectRoller('b-1')">
-          <div class="rc-hdr">
-            <span class="rc-name">b-1 롤러</span>
-            <span class="badge bg">정상</span>
-          </div>
-          <div class="wbar-wrap"><div class="wbar" style="width:42%;background:linear-gradient(90deg,#2dcfae,#25b898);"></div></div>
-          <div class="wbar-lbl"><span>마모율 42%</span><span>잔여 58%</span></div>
+      <!-- 운전 변수 -->
+      <div class="sec-label">운전 변수</div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="mc-label">부하</div>
+          <div class="mc-val" style="color:#2dcfae;" id="mv-mw">218</div>
+          <div class="mc-unit">MW</div>
         </div>
-
-        <div class="rc" id="rc-b2" onclick="rpSelectRoller('b-2')">
-          <div class="rc-hdr">
-            <span class="rc-name">b-2 롤러</span>
-            <span class="badge bw">주의</span>
-          </div>
-          <div class="wbar-wrap"><div class="wbar" style="width:71%;background:linear-gradient(90deg,#f0b429,#d09020);"></div></div>
-          <div class="wbar-lbl"><span>마모율 71%</span><span>잔여 29%</span></div>
+        <div class="metric-card">
+          <div class="mc-label">급탄율</div>
+          <div class="mc-val" style="color:#e6edf3;" id="mv-feed">42.3</div>
+          <div class="mc-unit">t/h</div>
         </div>
-
-        <div class="rc" id="rc-b3" onclick="rpSelectRoller('b-3')">
-          <div class="rc-hdr">
-            <span class="rc-name">b-3 롤러</span>
-            <span class="badge bg">정상</span>
-          </div>
-          <div class="wbar-wrap"><div class="wbar" style="width:35%;background:linear-gradient(90deg,#2dcfae,#25b898);"></div></div>
-          <div class="wbar-lbl"><span>마모율 35%</span><span>잔여 65%</span></div>
+        <div class="metric-card">
+          <div class="mc-label">저널 입력</div>
+          <div class="mc-val" style="color:#e6edf3;" id="mv-journal">8.4</div>
+          <div class="mc-unit">kPa</div>
         </div>
-
+        <div class="metric-card">
+          <div class="mc-label">보울 차압</div>
+          <div class="mc-val" style="color:#e6edf3;" id="mv-bowl">142</div>
+          <div class="mc-unit">mmH₂O</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-label">분급기 속도</div>
+          <div class="mc-val" style="color:#e6edf3;" id="mv-rpm">24.5</div>
+          <div class="mc-unit">rpm</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-label">AMWI</div>
+          <div class="mc-val" style="color:#f0b429;" id="mv-amwi">0.29</div>
+          <div class="mc-unit">× (주의)</div>
+        </div>
       </div>
 
-      <div class="warn-box" style="margin-top:12px;">
+      <!-- 마모/손상 -->
+      <div class="sec-label">마모 / 손상</div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="mc-label">예측 마모(평균)</div>
+          <div class="mc-val" style="color:#f0b429;" id="mv-worn">23.4</div>
+          <div class="mc-unit">mm / 한계 50mm</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-label">손상도</div>
+          <div class="mc-val" style="color:#f0b429;" id="mv-damage">46.8</div>
+          <div class="mc-unit">%</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-label">마모율</div>
+          <div class="mc-val" style="color:#e6edf3;" id="mv-rate">0.041</div>
+          <div class="mc-unit">mm/h</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-label">심각도 배수</div>
+          <div class="mc-val" style="color:#f0b429;" id="mv-severity">1.5</div>
+          <div class="mc-unit">× 가속 마모</div>
+        </div>
+      </div>
+
+      <!-- 잔여수명 (RUL) -->
+      <div class="sec-label">잔여수명(RUL) · 교체 예측</div>
+      <div class="rul-box">
+        <div class="rul-label">b-2 롤러 (최소 잔여수명)</div>
+        <div class="rul-val" id="rul-days">420</div>
+        <div class="rul-sub">시간 남음 (2025-10-20 교체 권장)</div>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px;">
+        <div class="rul-box" style="flex:1;padding:6px 9px;">
+          <div class="rul-label">b-1</div>
+          <div style="font-size:14px;font-weight:800;color:#2dcfae;">3,200<span style="font-size:9px;color:#6a8aaa;font-weight:400;"> hr</span></div>
+        </div>
+        <div class="rul-box" style="flex:1;padding:6px 9px;">
+          <div class="rul-label">b-2</div>
+          <div style="font-size:14px;font-weight:800;color:#f0b429;">420<span style="font-size:9px;color:#6a8aaa;font-weight:400;"> hr</span></div>
+        </div>
+        <div class="rul-box" style="flex:1;padding:6px 9px;">
+          <div class="rul-label">b-3</div>
+          <div style="font-size:14px;font-weight:800;color:#2dcfae;">3,800<span style="font-size:9px;color:#6a8aaa;font-weight:400;"> hr</span></div>
+        </div>
+      </div>
+
+      <!-- 롤별 마모 히트맵 바 (Zone 1~10) -->
+      <div class="sec-label">롤타이어 마모 히트맵 — 위치 1~10</div>
+      <div id="rp-heatmap"></div>
+
+      <!-- 경고 -->
+      <div class="warn-box" style="margin-top:10px;">
         <div class="warn-title">⚠ b-2 롤러 점검 필요</div>
-        <div class="warn-body">마모율 71% 초과 — Zone 8~10 집중 마모 감지.<br>예상 잔여 수명: 약 420시간</div>
+        <div class="warn-body">Zone 8~10 집중 마모 — 손상도 71% 초과.<br>예상 교체일: 2025-10-20 (현재 기준)</div>
       </div>
-
-      <div class="sec-label">누적 가동 시간</div>
-      <div class="info-row"><span class="il">b-1</span><span class="iv good">3,360 hr</span></div>
-      <div class="info-row"><span class="il">b-2</span><span class="iv warn">5,680 hr</span></div>
-      <div class="info-row"><span class="il">b-3</span><span class="iv good">2,800 hr</span></div>
-
-      <div class="sec-label">기술 사양</div>
-      <div class="info-row"><span class="il">Zone 1 (내측)</span><span class="iv">좁은 끝</span></div>
-      <div class="info-row"><span class="il">Zone 10 (외측)</span><span class="iv">넓은 끝</span></div>
-      <div class="info-row"><span class="il">접촉각</span><span class="iv">15°</span></div>
-      <div class="info-row"><span class="il">최대 하중</span><span class="iv">180 kN</span></div>
 
     </div>
   </div>
@@ -556,6 +601,20 @@ function showTip(e,title,body){
 }
 function hideTip(){document.getElementById('tooltip').style.display='none';}
 
+// ── Right panel heatmap bars ──
+function buildRpHeatmap(){
+  const el=document.getElementById('rp-heatmap');
+  if(!el) return;
+  el.innerHTML=['b-1','b-2','b-3'].map(r=>{
+    const avg=Math.round(WEAR[r].reduce((a,b)=>a+b,0)/WEAR[r].length);
+    const segs=WEAR[r].map((p,i)=>`<div class="hm-bar-seg" style="background:${wearColor(p)};" title="Z${i+1}: ${p}%"></div>`).join('');
+    return `<div class="hm-bar-row">
+      <div class="hm-bar-lbl"><span style="color:#e6edf3;font-weight:700;">${r}</span><span>예측평균 ${avg}%</span></div>
+      <div class="hm-bar-track">${segs}</div>
+    </div>`;
+  }).join('');
+}
+
 // ── Roller selection (drawing tab) ──
 function setRoller(r,btn){
   selRoller=r;
@@ -587,7 +646,7 @@ function selectPart(part,btn){
     document.getElementById('right-panel').classList.add('open');
     document.getElementById('bottom-panel').classList.add('open');
     setTimeout(()=>{
-      buildHeatmap();updateSvgOverlay();updateZoneList();drawGraph();
+      buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();
     },360);
   }
 }
@@ -608,7 +667,7 @@ window.onUnityPartSelected = function(partId) {
     if(rollBtn)rollBtn.classList.add('active');
     document.getElementById('right-panel').classList.add('open');
     document.getElementById('bottom-panel').classList.add('open');
-    setTimeout(()=>{buildHeatmap();updateSvgOverlay();updateZoneList();drawGraph();},360);
+    setTimeout(()=>{buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();},360);
   }
 };
 
@@ -714,7 +773,6 @@ sc.onload=()=>{
     document.querySelector('#unity-loading-bar').style.display='none';
     document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
     document.getElementById('part-sel').style.display='flex';
-    // Auto-open roll tire panels on load
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
   }).catch(console.error);
 };

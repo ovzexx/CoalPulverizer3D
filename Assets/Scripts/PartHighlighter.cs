@@ -51,8 +51,10 @@ namespace CoalPulverizer
 
         private void ApplyMaterial(Renderer rend, Material mat)
         {
-            // 마모 구간 오버레이는 항상 자체 색상 유지
+            // 마모 구간 오버레이, 텍스트 라벨, 콜아웃 라인은 자체 재질 유지
             if (rend.GetComponent<RollTireZone>() != null) return;
+            if (rend.GetComponent<TextMesh>() != null) return;
+            if (rend is LineRenderer) return;
 
             if (!_origMats.ContainsKey(rend))
                 _origMats[rend] = rend.sharedMaterials;
