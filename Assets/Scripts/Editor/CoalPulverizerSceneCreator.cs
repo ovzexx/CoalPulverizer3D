@@ -1,11 +1,9 @@
 #if UNITY_EDITOR
 using System.Linq;
 using CoalPulverizer;
-using CoalPulverizer.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace CoalPulverizerEditor
 {
@@ -59,21 +57,7 @@ namespace CoalPulverizerEditor
             root.AddComponent<PartHighlighter>();
             root.AddComponent<PartSelector>();
 
-            // Canvas + PartInfoPanel (우측 슬라이드인 패널)
-            GameObject canvasGo = new GameObject("UI Canvas");
-            Canvas canvas = canvasGo.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 10;
-            var scaler = canvasGo.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode        = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.screenMatchMode     = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight  = 0.5f;
-            canvasGo.AddComponent<GraphicRaycaster>();
-
-            canvasGo.AddComponent<PartInfoPanel>();
-            // PartInfoPanel.Awake() calls Build() automatically at runtime
-            // ──────────────────────────────────────────────────────────
+            // UI 패널은 HTML 프론트엔드에서 처리 — Unity Canvas 불필요
 
             GameObject cameraObject = new GameObject("Orbit Camera");
             cameraObject.tag = "MainCamera";
