@@ -80,6 +80,14 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 .mc-val{font-size:16px;font-weight:800;line-height:1.1;}
 .mc-unit{font-size:9px;color:#8b949e;}
 
+/* Alert banner (top of right panel) */
+.alert-banner{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);border-radius:9px;padding:10px 12px;margin-bottom:10px;}
+.alert-banner-title{font-size:12px;font-weight:700;color:#ef4444;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.alert-banner-body{font-size:11px;color:#c9d1d9;line-height:1.6;}
+.alert-banner-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid rgba(239,68,68,.2);}
+.alert-banner-replace{font-size:11px;color:#f0b429;font-weight:600;}
+.alert-banner-date{font-size:10px;color:#8b949e;}
+
 /* RUL box */
 .rul-box{background:#1a2535;border:1px solid #2a4a6a;border-radius:8px;padding:9px 11px;margin-top:2px;}
 .rul-label{font-size:10px;color:#4a8aaa;margin-bottom:4px;font-weight:600;}
@@ -458,6 +466,22 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
   <div class="right-panel" id="right-panel">
     <div class="rp-inner">
 
+      <!-- 최우선 경고: 점검 필요 + 교체 예측 -->
+      <div class="alert-banner" id="alert-banner">
+        <div class="alert-banner-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="alert-title">b-2 롤러 — 즉시 점검 필요</span>
+        </div>
+        <div class="alert-banner-body">
+          Zone 8~10 집중 마모 · 손상도 <strong style="color:#ef4444;" id="alert-damage">71%</strong> 초과<br>
+          잔여수명 <strong id="alert-rul" style="color:#f0b429;">420시간</strong> · 계속 운전 시 파손 위험
+        </div>
+        <div class="alert-banner-row">
+          <span class="alert-banner-replace">교체 권장: <span id="alert-replace-date">2025-10-20</span></span>
+          <span class="alert-banner-date" id="alert-season">2025년 4분기</span>
+        </div>
+      </div>
+
       <div class="sec-hdr">
         <div class="panel-title"><div class="title-bar"></div>롤 타이어 — 상태·마모</div>
         <button class="close-btn-x" onclick="closePanels()">✕</button>
@@ -508,12 +532,6 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
           <div class="rul-label">b-3</div>
           <div style="font-size:14px;font-weight:800;color:#2dcfae;">3,800<span style="font-size:9px;color:#6a8aaa;font-weight:400;"> hr</span></div>
         </div>
-      </div>
-
-      <!-- 경고 -->
-      <div class="warn-box" style="margin-top:8px;">
-        <div class="warn-title">⚠ b-2 롤러 점검 필요</div>
-        <div class="warn-body">Zone 8~10 집중 마모 — 손상도 71% 초과.<br>예상 교체일: 2025-10-20 (현재 기준)</div>
       </div>
 
       <!-- ③ 롤별 마모 히트맵 바 (Zone 1~10) -->
@@ -673,6 +691,44 @@ function toggleOpVars(){
   arrow.textContent=open?'▲ 접기':'▼ 펼치기';
 }
 
+// ── 경고 배너 업데이트 ──
+const RUL_HOURS={'b-1':3200,'b-2':420,'b-3':3800};
+const RUL_DATES={'b-1':'2026-05-12','b-2':'2025-10-20','b-3':'2026-07-08'};
+const RUL_SEASONS={'b-1':'2026년 2분기','b-2':'2025년 4분기','b-3':'2026년 3분기'};
+
+function updateAlertBanner(){
+  // 최대 마모율 롤러 탐색
+  let worstRoller='b-2', worstMax=0;
+  ['b-1','b-2','b-3'].forEach(r=>{
+    const mx=Math.max(...WEAR[r]);
+    if(mx>worstMax){worstMax=mx;worstRoller=r;}
+  });
+  const avgDamage=Math.round(WEAR[worstRoller].reduce((a,b)=>a+b,0)/WEAR[worstRoller].length);
+  const rul=RUL_HOURS[worstRoller];
+  const isUrgent=worstMax>=60||rul<1000;
+
+  const banner=document.getElementById('alert-banner');
+  if(!banner) return;
+  banner.style.borderColor=isUrgent?'rgba(239,68,68,.35)':'rgba(240,180,41,.35)';
+  banner.style.background=isUrgent?'rgba(239,68,68,.10)':'rgba(240,180,41,.08)';
+
+  const titleEl=document.getElementById('alert-title');
+  const titleColor=isUrgent?'#ef4444':'#f0b429';
+  if(titleEl){
+    titleEl.textContent=`${worstRoller} 롤러 — ${isUrgent?'즉시 점검 필요':'주의 관찰 권장'}`;
+    titleEl.parentElement.style.color=titleColor;
+    titleEl.parentElement.querySelector('svg').setAttribute('stroke',titleColor);
+  }
+  const dmg=document.getElementById('alert-damage');
+  if(dmg){dmg.textContent=worstMax+'%';dmg.style.color=titleColor;}
+  const rulEl=document.getElementById('alert-rul');
+  if(rulEl) rulEl.textContent=rul.toLocaleString()+'시간';
+  const rd=document.getElementById('alert-replace-date');
+  if(rd) rd.textContent=RUL_DATES[worstRoller];
+  const rs=document.getElementById('alert-season');
+  if(rs) rs.textContent=RUL_SEASONS[worstRoller];
+}
+
 // ── Right panel heatmap bars ──
 function buildRpHeatmap(){
   const el=document.getElementById('rp-heatmap');
@@ -718,7 +774,7 @@ function selectPart(part,btn){
     document.getElementById('right-panel').classList.add('open');
     document.getElementById('bottom-panel').classList.add('open');
     setTimeout(()=>{
-      buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();
+      updateAlertBanner();buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();
     },360);
   }
 }
@@ -753,7 +809,7 @@ window.onUnityPartSelected = function(partId) {
     if(rollBtn)rollBtn.classList.add('active');
     document.getElementById('right-panel').classList.add('open');
     document.getElementById('bottom-panel').classList.add('open');
-    setTimeout(()=>{buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();},360);
+    setTimeout(()=>{updateAlertBanner();buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();},360);
   }
 };
 
@@ -831,20 +887,6 @@ setInterval(()=>{
   if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
 },1000);
 
-// ── 모바일 감지: Unity WebGL은 모바일 메모리 한계로 로드 불가 ──
-const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-if (isMobile) {
-  // Unity 로딩바 숨기고 "PC 전용" 안내 표시
-  document.getElementById('unity-loading-bar').innerHTML =
-    '<div style="color:#484f58;font-size:12px;text-align:center;padding:20px;">3D 모델은 PC 브라우저에서 지원됩니다</div>';
-  document.getElementById('part-sel').style.display = 'flex';
-  // 패널 바로 열기 (Unity 없이)
-  setTimeout(() => {
-    selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
-    buildRpHeatmap(); updateSvgOverlay(); updateZoneList(); buildHeatmap();
-  }, 300);
-}
-
 // ── Unity loader ──
 var canvas=document.querySelector('#unity-canvas');
 function unityShowBanner(msg,type){
@@ -864,7 +906,6 @@ var config={
   showBanner:unityShowBanner
 };
 document.querySelector('#unity-loading-bar').style.display='flex';
-if (!isMobile) {
 var sc=document.createElement('script');
 sc.src=buildUrl+'/unity_webgl.loader.js';
 sc.onload=()=>{
@@ -880,7 +921,6 @@ sc.onload=()=>{
   }).catch(console.error);
 };
 document.body.appendChild(sc);
-}
 
 window.addEventListener('resize',()=>{
   if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
