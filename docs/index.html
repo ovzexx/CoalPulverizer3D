@@ -161,6 +161,64 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
 /* Tooltip */
 #tooltip{position:fixed;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:5px 10px;font-size:11px;color:#e6edf3;pointer-events:none;z-index:999;display:none;white-space:nowrap;}
+
+/* ── 모바일 반응형 ── */
+@media (max-width:768px){
+  /* 헤더 압축 */
+  .hdr{height:auto;min-height:42px;padding:6px 10px;flex-wrap:wrap;gap:3px;}
+  .hdr-sub{display:none;}
+  .hdr-right>div:first-child{display:none;} /* 설비명 숨김 */
+  .hdr-title{font-size:13px;}
+  #clock{font-size:10px;}
+
+  /* 레이아웃: 세로 스택 */
+  .main{flex-direction:column;}
+
+  /* Unity 캔버스: 상단 고정 높이 */
+  .viewer-col{flex:none;height:42vh;}
+  .viewer-wrap{flex:1;}
+
+  /* 하단 패널: 모바일에서 숨김 (우측 패널로 통합) */
+  .bottom-panel{display:none!important;}
+
+  /* 우측 패널 → 전폭 하단 시트로 전환 */
+  .right-panel{
+    width:100%!important;
+    height:0;
+    border-left:none;
+    border-top:2px solid #30363d;
+    transition:height .35s cubic-bezier(.25,.46,.45,.94);
+    overflow:hidden;
+  }
+  .right-panel.open{
+    height:calc(58vh - 42px);
+    width:100%!important;
+    overflow-y:auto;
+  }
+  .rp-inner{width:100%!important;padding:10px 14px;}
+
+  /* 메트릭 카드 크기 축소 */
+  .metric-grid{gap:5px;}
+  .mc-val{font-size:14px;}
+  .mc-label{font-size:9px;}
+  .mc-unit{font-size:8px;}
+  .rul-val{font-size:16px;}
+
+  /* RUL 롤러 3칸: 작게 */
+  .rul-box{padding:6px 8px;}
+
+  /* 히트맵 바 높이 줄임 */
+  .hm-bar-track{height:11px;}
+
+  /* Part 선택 버튼: 가로 배치 */
+  .part-sel{flex-direction:row!important;flex-wrap:wrap;gap:3px;top:6px;left:6px;}
+  .part-sel-label{display:none;}
+  .pbtn{padding:3px 8px;font-size:10px;}
+
+  /* Unity footer */
+  #unity-footer{padding:4px 8px;}
+  #unity-build-title{display:none;}
+}
 </style>
 </head>
 <body>
