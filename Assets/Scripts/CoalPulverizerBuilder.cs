@@ -36,11 +36,8 @@ namespace CoalPulverizer
 
         private void OnEnable()
         {
-            if (Application.isPlaying)
-            {
-                Rebuild();
-                return;
-            }
+            // 런타임에서는 씬에 저장된 모델을 그대로 사용 — 재빌드 불필요
+            if (Application.isPlaying) return;
 
             if (transform.childCount == 0)
             {

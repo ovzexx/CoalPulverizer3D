@@ -897,10 +897,11 @@ function unityShowBanner(msg,type){
     setTimeout(()=>{try{w.removeChild(d);}catch(e){}},5000);}
 }
 var buildUrl='Build';
+var bv='7';
 var config={
-  dataUrl:buildUrl+'/unity_webgl.data',
-  frameworkUrl:buildUrl+'/unity_webgl.framework.js',
-  codeUrl:buildUrl+'/unity_webgl.wasm',
+  dataUrl:buildUrl+'/unity_webgl.data?v='+bv,
+  frameworkUrl:buildUrl+'/unity_webgl.framework.js?v='+bv,
+  codeUrl:buildUrl+'/unity_webgl.wasm?v='+bv,
   streamingAssetsUrl:'StreamingAssets',
   companyName:'NEXTRO',productName:'BowlMillPrototype',productVersion:'1.0',
   showBanner:unityShowBanner
