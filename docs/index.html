@@ -1,133 +1,662 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | BowlMillPrototype</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXTRO | 석탄 미분기 디지털 트윈</title>
+<link rel="shortcut icon" href="TemplateData/favicon.ico">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── Header ── */
+.hdr{background:#161b22;border-bottom:1px solid #30363d;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-logo{display:flex;align-items:center;gap:10px;}
+.hdr-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:.04em;}
+.hdr-sub{font-size:11px;color:#8b949e;}
+.hdr-right{display:flex;align-items:center;gap:20px;}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:#2dcfae;}
+.dot{width:7px;height:7px;background:#2dcfae;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+#clock{font-size:12px;color:#8b949e;font-variant-numeric:tabular-nums;}
+
+/* ── Layout ── */
+.main{flex:1;display:flex;overflow:hidden;min-height:0;}
+.viewer-col{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;}
+
+/* ── Unity viewer ── */
+.viewer-wrap{flex:1;position:relative;background:#050a10;min-height:0;}
+#unity-container{position:absolute;inset:0;}
+#unity-canvas{width:100%!important;height:100%!important;display:block;}
+
+/* Loading */
+#unity-loading-bar{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#050a10;z-index:10;}
+.ld-logo{font-size:26px;font-weight:800;color:#2dcfae;letter-spacing:.12em;margin-bottom:28px;}
+#unity-progress-bar-empty{width:260px;height:3px;background:#21262d;border-radius:2px;overflow:hidden;}
+#unity-progress-bar-full{height:100%;background:linear-gradient(90deg,#2dcfae,#1b5ea1);width:0%;transition:width .3s;}
+.ld-txt{margin-top:12px;font-size:11px;color:#8b949e;}
+#unity-warning{position:absolute;top:0;left:0;right:0;z-index:20;}
+#unity-footer{position:absolute;bottom:0;right:0;display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(0,0,0,.5);}
+#unity-build-title{font-size:10px;color:#484f58;}
+#unity-fullscreen-button{width:22px;height:22px;cursor:pointer;background:url(TemplateData/fullscreen-button.png) center/contain no-repeat;opacity:.5;}
+#unity-fullscreen-button:hover{opacity:1;}
+
+/* Part selector overlay */
+.part-sel{position:absolute;top:12px;left:12px;display:none;flex-direction:column;gap:5px;z-index:5;}
+.part-sel-label{font-size:10px;color:#8b949e;margin-bottom:2px;}
+.pbtn{background:rgba(22,27,34,.88);border:1px solid #30363d;color:#e6edf3;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:12px;backdrop-filter:blur(8px);transition:all .2s;}
+.pbtn:hover,.pbtn.active{border-color:#2dcfae;color:#2dcfae;background:rgba(45,207,174,.1);}
+.pbtn.close-btn:hover{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,.1);}
+
+/* ── Bottom panel ── */
+.bottom-panel{flex-shrink:0;background:#161b22;border-top:1px solid #30363d;height:0;overflow:hidden;transition:height .35s cubic-bezier(.25,.46,.45,.94);}
+.bottom-panel.open{height:290px;}
+.bp-inner{height:290px;display:flex;flex-direction:column;}
+.bp-tabs{display:flex;border-bottom:1px solid #21262d;padding:0 14px;flex-shrink:0;}
+.bp-tab{padding:9px 16px;font-size:12px;color:#8b949e;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;}
+.bp-tab.active{color:#2dcfae;border-bottom-color:#2dcfae;}
+.bp-tab:hover:not(.active){color:#e6edf3;}
+.bp-tab.close-tab{color:#484f58;margin-left:auto;}
+.bp-tab.close-tab:hover{color:#ef4444;}
+.bp-pane{display:none;flex:1;padding:12px 16px;overflow:hidden;gap:14px;min-height:0;}
+.bp-pane.active{display:flex;}
+
+/* ── Right panel ── */
+.right-panel{width:0;flex-shrink:0;background:#161b22;border-left:1px solid #30363d;overflow:hidden;transition:width .35s cubic-bezier(.25,.46,.45,.94);}
+.right-panel.open{width:296px;}
+.rp-inner{width:296px;height:100%;overflow-y:auto;padding:14px;}
+.rp-inner::-webkit-scrollbar{width:4px;}
+.rp-inner::-webkit-scrollbar-track{background:#0d1117;}
+.rp-inner::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px;}
+
+/* Panel shared components */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.panel-title{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+.title-bar{width:4px;height:18px;background:#2dcfae;border-radius:2px;}
+.close-btn-x{background:none;border:none;color:#484f58;cursor:pointer;font-size:15px;line-height:1;padding:2px;}
+.close-btn-x:hover{color:#ef4444;}
+.sec-label{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 7px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #21262d;font-size:12px;}
+.info-row:last-child{border-bottom:none;}
+.il{color:#8b949e;}
+.iv{color:#e6edf3;font-weight:600;}
+.iv.good{color:#2dcfae;}
+.iv.warn{color:#f0b429;}
+.iv.danger{color:#ef4444;}
+
+/* Roller cards */
+.roller-cards{display:flex;flex-direction:column;gap:7px;}
+.rc{background:#21262d;border:1px solid #30363d;border-radius:8px;padding:9px 11px;cursor:pointer;transition:all .2s;}
+.rc:hover{border-color:#2dcfae;}
+.rc.sel{border-color:#2dcfae;background:rgba(45,207,174,.07);}
+.rc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.rc-name{font-size:12px;font-weight:700;color:#fff;}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.bg{background:rgba(45,207,174,.18);color:#2dcfae;}
+.bw{background:rgba(240,180,41,.18);color:#f0b429;}
+.bd{background:rgba(239,68,68,.18);color:#ef4444;}
+.wbar-wrap{background:#30363d;height:4px;border-radius:2px;overflow:hidden;}
+.wbar{height:100%;border-radius:2px;}
+.wbar-lbl{display:flex;justify-content:space-between;font-size:10px;color:#8b949e;margin-top:3px;}
+.warn-box{background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.25);border-radius:8px;padding:9px 11px;margin-top:2px;}
+.warn-title{font-size:11px;color:#f0b429;font-weight:600;margin-bottom:3px;}
+.warn-body{font-size:10px;color:#8b949e;line-height:1.5;}
+
+/* ── Drawing tab ── */
+.drawing-box{flex:1;display:flex;flex-direction:column;min-width:0;}
+.drawing-svg-wrap{flex:1;background:#08111a;border:1px solid #21262d;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden;}
+.zone-sidebar{width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.roller-toggle{display:flex;gap:5px;margin-bottom:6px;}
+.rtbtn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;transition:all .2s;}
+.rtbtn.active,.rtbtn:hover{border-color:#2dcfae;color:#2dcfae;background:rgba(45,207,174,.1);}
+#zone-list{font-size:11px;flex:1;overflow-y:auto;}
+#zone-list::-webkit-scrollbar{width:3px;}
+#zone-list::-webkit-scrollbar-thumb{background:#30363d;}
+.zone-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1c2333;}
+.zone-bar-mini{width:36px;height:3px;background:#21262d;border-radius:1px;overflow:hidden;display:inline-block;vertical-align:middle;}
+.zone-bar-fill{height:100%;border-radius:1px;}
+
+/* ── Wear tab ── */
+.heatmap-wrap{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.hm-subtitle{font-size:11px;color:#8b949e;}
+.hm-grid{display:flex;flex-direction:column;gap:6px;flex:1;}
+.hm-row{display:flex;align-items:center;gap:7px;}
+.hm-rlabel{font-size:11px;color:#8b949e;width:26px;text-align:right;flex-shrink:0;}
+.hm-zones{display:flex;flex:1;gap:2px;}
+.zone-cell{flex:1;height:40px;border-radius:3px;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;}
+.zone-cell:hover{transform:scaleY(1.12);box-shadow:0 0 6px rgba(45,207,174,.4);z-index:2;}
+.hm-z-labels{display:flex;padding-left:33px;gap:2px;}
+.hm-zn{flex:1;text-align:center;font-size:9px;color:#484f58;margin-top:3px;}
+.hm-legend{display:flex;align-items:center;gap:8px;font-size:10px;color:#8b949e;margin-top:4px;}
+.legend-grad{flex:1;height:7px;border-radius:3px;background:linear-gradient(to right,#2dcfae,#f0b429,#ef4444);}
+
+/* ── Graph tab ── */
+.graph-wrap{flex:1;display:flex;flex-direction:column;min-width:0;}
+#graph-canvas{flex:1;background:#08111a;border:1px solid #21262d;border-radius:8px;display:block;}
+.stat-cards{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.stat-card{background:#21262d;border-radius:8px;padding:10px 12px;}
+.stat-label{font-size:10px;color:#8b949e;margin-bottom:2px;}
+.stat-val{font-size:22px;font-weight:800;line-height:1;}
+.stat-unit{font-size:10px;color:#8b949e;margin-top:2px;}
+
+/* Tooltip */
+#tooltip{position:fixed;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:5px 10px;font-size:11px;color:#e6edf3;pointer-events:none;z-index:999;display:none;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="hdr">
+  <div class="hdr-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" fill="none" stroke="#2dcfae" stroke-width="1.5"/>
+      <polygon points="14,6 10,17 14,14 18,17" fill="#2dcfae"/>
+    </svg>
+    <div>
+      <div class="hdr-title">NEXTRO 디지털 트윈</div>
+      <div class="hdr-sub">석탄 미분기 (Bowl Mill) 모니터링 시스템</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div style="font-size:12px;color:#8b949e;">한국중부발전 A-301 미분기</div>
+    <div class="live-badge"><div class="dot"></div>실시간 모니터링 중</div>
+    <div id="clock"></div>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Viewer column (canvas + bottom panel) -->
+  <div class="viewer-col">
+
+    <!-- Unity 3D -->
+    <div class="viewer-wrap">
+      <div id="unity-container">
+        <canvas id="unity-canvas" tabindex="-1"></canvas>
       </div>
-      <div id="unity-warning"> </div>
+
+      <div id="unity-loading-bar">
+        <div class="ld-logo">NEXTRO</div>
+        <div id="unity-progress-bar-empty"><div id="unity-progress-bar-full"></div></div>
+        <div class="ld-txt">석탄 미분기 3D 모델 로딩 중…</div>
+      </div>
+      <div id="unity-warning"></div>
+
+      <!-- Part selector overlay -->
+      <div class="part-sel" id="part-sel">
+        <div class="part-sel-label">부품 선택</div>
+        <button class="pbtn active" onclick="selectPart('roll-tire',this)">🔩 롤 타이어</button>
+        <button class="pbtn" onclick="selectPart('bowl',this)">⚙ 그라인딩 볼</button>
+        <button class="pbtn" onclick="selectPart('separator',this)">🌀 분리기</button>
+        <button class="pbtn close-btn" onclick="closePanels()">✕ 닫기</button>
+      </div>
+
       <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
+        <div id="unity-build-title">BowlMillPrototype · NEXTRO</div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">BowlMillPrototype</div>
       </div>
     </div>
-    <script>
-      var canvas = document.querySelector("#unity-canvas");
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
+    <!-- ── Bottom panel ── -->
+    <div class="bottom-panel" id="bottom-panel">
+      <div class="bp-inner">
+        <div class="bp-tabs">
+          <button class="bp-tab active" onclick="bpTab('drawing',this)">엔지니어링 도면</button>
+          <button class="bp-tab" onclick="bpTab('wear',this)">마모도</button>
+          <button class="bp-tab" onclick="bpTab('graph',this)">상태 그래프</button>
+          <button class="bp-tab close-tab" onclick="closeBottom()">✕ 닫기</button>
+        </div>
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/unity_webgl.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/unity_webgl.data",
-        frameworkUrl: buildUrl + "/unity_webgl.framework.js",
-        codeUrl: buildUrl + "/unity_webgl.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "NEXTRO",
-        productName: "BowlMillPrototype",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
+        <!-- Drawing pane -->
+        <div class="bp-pane active" id="bp-drawing">
+          <div class="drawing-box">
+            <div style="font-size:11px;color:#8b949e;margin-bottom:6px;">롤 타이어 단면도 (Roll Tire Cross-Section) — Zone 1: 내측(좁은 끝) → Zone 10: 외측(넓은 끝)</div>
+            <div class="drawing-svg-wrap">
+              <svg id="rt-svg" viewBox="0 0 720 180" style="width:100%;height:100%;max-height:180px;">
+                <defs>
+                  <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M20 0L0 0 0 20" fill="none" stroke="#111d2b" stroke-width=".6"/>
+                  </pattern>
+                  <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2a4a2a"/>
+                    <stop offset="100%" stop-color="#1a3018"/>
+                  </linearGradient>
+                </defs>
+                <rect width="720" height="180" fill="url(#g)"/>
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
+                <!-- Journal arm -->
+                <rect x="20" y="80" width="155" height="28" fill="#2e3f52" rx="4"/>
+                <rect x="155" y="65" width="28" height="58" fill="#3a4f65" rx="3"/>
 
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
+                <!-- Roll tire body (frustum cross-section: narrow left=z1, wide right=z10) -->
+                <!-- Top edge: y=38 (left) to y=22 (right, slightly higher = wider) -->
+                <!-- Bottom/contact edge: y=148 flat -->
+                <polygon points="183,42 560,22 560,148 183,148" fill="url(#tg)" stroke="#3a6a38" stroke-width="1.5"/>
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
+                <!-- Contact face highlight -->
+                <rect x="183" y="138" width="377" height="10" fill="#1a3a18" opacity=".9"/>
 
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
+                <!-- Zone wear overlay (rendered by JS) -->
+                <g id="zone-svg-overlay"></g>
 
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
+                <!-- Zone dividers -->
+                <g stroke="#2dcfae" stroke-width=".7" stroke-dasharray="4,4" opacity=".4">
+                  <line x1="220" y1="42" x2="220" y2="148"/>
+                  <line x1="257" y1="39" x2="257" y2="148"/>
+                  <line x1="294" y1="36" x2="294" y2="148"/>
+                  <line x1="331" y1="33" x2="331" y2="148"/>
+                  <line x1="368" y1="30" x2="368" y2="148"/>
+                  <line x1="405" y1="27" x2="405" y2="148"/>
+                  <line x1="442" y1="25" x2="442" y2="148"/>
+                  <line x1="479" y1="23" x2="479" y2="148"/>
+                  <line x1="516" y1="22" x2="516" y2="148"/>
+                </g>
 
+                <!-- Zone numbers -->
+                <g fill="#2dcfae" font-size="10" font-family="monospace" text-anchor="middle" opacity=".85">
+                  <text x="201" y="163">1</text><text x="238" y="163">2</text>
+                  <text x="275" y="163">3</text><text x="312" y="163">4</text>
+                  <text x="349" y="163">5</text><text x="386" y="163">6</text>
+                  <text x="423" y="163">7</text><text x="460" y="163">8</text>
+                  <text x="497" y="163">9</text><text x="538" y="163">10</text>
+                </g>
 
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
+                <!-- Axis arrow -->
+                <line x1="183" y1="172" x2="560" y2="172" stroke="#30363d" stroke-width="1"/>
+                <polygon points="560,169 566,172 560,175" fill="#30363d"/>
+                <polygon points="183,169 177,172 183,175" fill="#30363d"/>
+                <text x="370" y="178" fill="#484f58" font-size="9" text-anchor="middle">← 내측 (Zone 1)  ·  외측 (Zone 10) →</text>
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+                <!-- Labels -->
+                <text x="80" y="94" fill="#8b949e" font-size="10" text-anchor="middle">저널 조립체</text>
+                <text x="80" y="106" fill="#8b949e" font-size="10" text-anchor="middle">(Journal Asm)</text>
+                <text x="370" y="36" fill="#c9d1d9" font-size="11" font-weight="bold" text-anchor="middle">롤 타이어 (Roll Tire)</text>
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+                <!-- Dimension line -->
+                <line x1="183" y1="12" x2="560" y2="12" stroke="#30363d" stroke-width=".8"/>
+                <line x1="183" y1="8" x2="183" y2="16" stroke="#30363d" stroke-width=".8"/>
+                <line x1="560" y1="8" x2="560" y2="16" stroke="#30363d" stroke-width=".8"/>
+                <text x="370" y="10" fill="#484f58" font-size="9" text-anchor="middle">타이어 전체 폭</text>
+              </svg>
+            </div>
+          </div>
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+          <!-- Zone detail sidebar -->
+          <div class="zone-sidebar">
+            <div style="font-size:11px;color:#8b949e;">롤러: <span id="sel-roller-lbl" style="color:#2dcfae;font-weight:700;">b-1</span></div>
+            <div class="roller-toggle">
+              <button class="rtbtn active" onclick="setRoller('b-1',this)">b-1</button>
+              <button class="rtbtn" onclick="setRoller('b-2',this)">b-2</button>
+              <button class="rtbtn" onclick="setRoller('b-3',this)">b-3</button>
+            </div>
+            <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">존별 마모율</div>
+            <div id="zone-list"></div>
+          </div>
+        </div>
 
-      document.body.appendChild(script);
+        <!-- Wear pane -->
+        <div class="bp-pane" id="bp-wear">
+          <div class="heatmap-wrap">
+            <div class="hm-subtitle">롤 타이어 마모도 히트맵 — Zone 1(내측) → Zone 10(외측)</div>
+            <div class="hm-grid" id="hm-grid"></div>
+            <div class="hm-z-labels" id="hm-zlabels"></div>
+            <div class="hm-legend">
+              <span>정상 (0%)</span>
+              <div class="legend-grad"></div>
+              <span>교체 (100%)</span>
+            </div>
+          </div>
+        </div>
 
-    </script>
-  </body>
+        <!-- Graph pane -->
+        <div class="bp-pane" id="bp-graph">
+          <div class="graph-wrap">
+            <div style="font-size:11px;color:#8b949e;margin-bottom:6px;">스프링 압력 &amp; 진동 — 실시간 (60초)</div>
+            <canvas id="graph-canvas"></canvas>
+          </div>
+          <div class="stat-cards">
+            <div class="stat-card">
+              <div class="stat-label">스프링 압력</div>
+              <div class="stat-val" id="sv-pressure" style="color:#2dcfae;">47.3</div>
+              <div class="stat-unit">kN</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">진동 (b-1)</div>
+              <div class="stat-val" id="sv-vib" style="color:#f0b429;">3.2</div>
+              <div class="stat-unit">mm/s</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">회전 속도</div>
+              <div class="stat-val" style="color:#e6edf3;">24.5</div>
+              <div class="stat-unit">RPM</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- end bottom-panel -->
+
+  </div><!-- end viewer-col -->
+
+  <!-- ── Right panel ── -->
+  <div class="right-panel" id="right-panel">
+    <div class="rp-inner">
+
+      <div class="sec-hdr">
+        <div class="panel-title"><div class="title-bar"></div>롤 타이어 정보</div>
+        <button class="close-btn-x" onclick="closePanels()">✕</button>
+      </div>
+
+      <div class="sec-label">기본 정보</div>
+      <div class="info-row"><span class="il">부품명</span><span class="iv">롤 타이어 (Roll Tire)</span></div>
+      <div class="info-row"><span class="il">재질</span><span class="iv">고크롬 합금강</span></div>
+      <div class="info-row"><span class="il">구간 수</span><span class="iv">10 Zone</span></div>
+      <div class="info-row"><span class="il">롤러 수</span><span class="iv">3개 (b-1, b-2, b-3)</span></div>
+      <div class="info-row"><span class="il">설계 수명</span><span class="iv">8,000 hr</span></div>
+
+      <div class="sec-label">롤러별 마모 상태</div>
+      <div class="roller-cards">
+
+        <div class="rc sel" id="rc-b1" onclick="rpSelectRoller('b-1')">
+          <div class="rc-hdr">
+            <span class="rc-name">b-1 롤러</span>
+            <span class="badge bg">정상</span>
+          </div>
+          <div class="wbar-wrap"><div class="wbar" style="width:42%;background:linear-gradient(90deg,#2dcfae,#25b898);"></div></div>
+          <div class="wbar-lbl"><span>마모율 42%</span><span>잔여 58%</span></div>
+        </div>
+
+        <div class="rc" id="rc-b2" onclick="rpSelectRoller('b-2')">
+          <div class="rc-hdr">
+            <span class="rc-name">b-2 롤러</span>
+            <span class="badge bw">주의</span>
+          </div>
+          <div class="wbar-wrap"><div class="wbar" style="width:71%;background:linear-gradient(90deg,#f0b429,#d09020);"></div></div>
+          <div class="wbar-lbl"><span>마모율 71%</span><span>잔여 29%</span></div>
+        </div>
+
+        <div class="rc" id="rc-b3" onclick="rpSelectRoller('b-3')">
+          <div class="rc-hdr">
+            <span class="rc-name">b-3 롤러</span>
+            <span class="badge bg">정상</span>
+          </div>
+          <div class="wbar-wrap"><div class="wbar" style="width:35%;background:linear-gradient(90deg,#2dcfae,#25b898);"></div></div>
+          <div class="wbar-lbl"><span>마모율 35%</span><span>잔여 65%</span></div>
+        </div>
+
+      </div>
+
+      <div class="warn-box" style="margin-top:12px;">
+        <div class="warn-title">⚠ b-2 롤러 점검 필요</div>
+        <div class="warn-body">마모율 71% 초과 — Zone 8~10 집중 마모 감지.<br>예상 잔여 수명: 약 420시간</div>
+      </div>
+
+      <div class="sec-label">누적 가동 시간</div>
+      <div class="info-row"><span class="il">b-1</span><span class="iv good">3,360 hr</span></div>
+      <div class="info-row"><span class="il">b-2</span><span class="iv warn">5,680 hr</span></div>
+      <div class="info-row"><span class="il">b-3</span><span class="iv good">2,800 hr</span></div>
+
+      <div class="sec-label">기술 사양</div>
+      <div class="info-row"><span class="il">Zone 1 (내측)</span><span class="iv">좁은 끝</span></div>
+      <div class="info-row"><span class="il">Zone 10 (외측)</span><span class="iv">넓은 끝</span></div>
+      <div class="info-row"><span class="il">접촉각</span><span class="iv">15°</span></div>
+      <div class="info-row"><span class="il">최대 하중</span><span class="iv">180 kN</span></div>
+
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<div id="tooltip"></div>
+
+<script>
+// ── Clock ──
+(function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.toLocaleDateString('ko-KR')+' '+n.toLocaleTimeString('ko-KR');
+  setTimeout(tick,1000);
+})();
+
+// ── Wear data: 10 zones, zone1=narrow/inner, zone10=wide/outer ──
+const WEAR={
+  'b-1':[12,18,25,31,38,42,45,48,52,58],
+  'b-2':[28,36,48,56,62,68,72,76,79,83],
+  'b-3':[ 8,14,20,25,30,33,36,38,40,43]
+};
+let selRoller='b-1';
+
+// ── Zone color ──
+function wearColor(p){
+  if(p<40) return `hsl(${162-p*0.5}deg,58%,${38+p*0.2}%)`;
+  if(p<70) return `hsl(${42-(p-40)*0.8}deg,78%,48%)`;
+  return `hsl(${8}deg,80%,${46-(p-70)*0.3}%)`;
+}
+
+// ── Drawing zone overlay ──
+const ZX=[183,220,257,294,331,368,405,442,479,516,560];
+function updateSvgOverlay(){
+  const g=document.getElementById('zone-svg-overlay');
+  g.innerHTML='';
+  WEAR[selRoller].forEach((p,i)=>{
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x',ZX[i]);
+    r.setAttribute('y',138);
+    r.setAttribute('width',ZX[i+1]-ZX[i]);
+    r.setAttribute('height',10);
+    r.setAttribute('fill',wearColor(p));
+    r.setAttribute('opacity','0.9');
+    g.appendChild(r);
+  });
+}
+
+// ── Zone list sidebar ──
+function updateZoneList(){
+  const el=document.getElementById('zone-list');
+  el.innerHTML=WEAR[selRoller].map((p,i)=>`
+    <div class="zone-row">
+      <span style="color:#8b949e">Z${i+1}</span>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div class="zone-bar-mini"><div class="zone-bar-fill" style="width:${p}%;background:${wearColor(p)};"></div></div>
+        <span style="color:${wearColor(p)};font-weight:600;min-width:28px;text-align:right;">${p}%</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── Heatmap ──
+function buildHeatmap(){
+  const grid=document.getElementById('hm-grid');
+  const zlbls=document.getElementById('hm-zlabels');
+  grid.innerHTML='';
+  ['b-1','b-2','b-3'].forEach(r=>{
+    const row=document.createElement('div');
+    row.className='hm-row';
+    const lbl=document.createElement('div');
+    lbl.className='hm-rlabel';lbl.textContent=r;
+    row.appendChild(lbl);
+    const zones=document.createElement('div');
+    zones.className='hm-zones';
+    WEAR[r].forEach((p,i)=>{
+      const c=document.createElement('div');
+      c.className='zone-cell';
+      c.style.background=wearColor(p);
+      c.addEventListener('mouseenter',e=>showTip(e,`${r} / Zone ${i+1}`,`마모율: ${p}%`));
+      c.addEventListener('mouseleave',hideTip);
+      zones.appendChild(c);
+    });
+    row.appendChild(zones);
+    grid.appendChild(row);
+  });
+  zlbls.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const n=document.createElement('div');
+    n.className='hm-zn';n.textContent=i;
+    zlbls.appendChild(n);
+  }
+}
+
+// ── Tooltip ──
+function showTip(e,title,body){
+  const t=document.getElementById('tooltip');
+  t.innerHTML=`<strong>${title}</strong> — ${body}`;
+  t.style.display='block';
+  t.style.left=(e.clientX+14)+'px';
+  t.style.top=(e.clientY-32)+'px';
+}
+function hideTip(){document.getElementById('tooltip').style.display='none';}
+
+// ── Roller selection (drawing tab) ──
+function setRoller(r,btn){
+  selRoller=r;
+  document.getElementById('sel-roller-lbl').textContent=r;
+  document.querySelectorAll('.rtbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateSvgOverlay();updateZoneList();
+}
+
+// ── Roller selection (right panel) ──
+function rpSelectRoller(r){
+  selRoller=r;
+  ['b-1','b-2','b-3'].forEach(x=>{
+    document.getElementById('rc-'+x.replace('-','')).classList.remove('sel');
+  });
+  document.getElementById('rc-'+r.replace('-','')).classList.add('sel');
+  document.getElementById('sel-roller-lbl').textContent=r;
+  document.querySelectorAll('.rtbtn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.trim()===r);
+  });
+  updateSvgOverlay();updateZoneList();
+}
+
+// ── Part selection ──
+function selectPart(part,btn){
+  document.querySelectorAll('.part-sel .pbtn:not(.close-btn)').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(part==='roll-tire'){
+    document.getElementById('right-panel').classList.add('open');
+    document.getElementById('bottom-panel').classList.add('open');
+    setTimeout(()=>{
+      buildHeatmap();updateSvgOverlay();updateZoneList();drawGraph();
+    },360);
+  }
+}
+function closePanels(){
+  document.getElementById('right-panel').classList.remove('open');
+  document.getElementById('bottom-panel').classList.remove('open');
+  document.querySelectorAll('.part-sel .pbtn').forEach(b=>b.classList.remove('active'));
+}
+function closeBottom(){
+  document.getElementById('bottom-panel').classList.remove('open');
+}
+
+// ── Bottom tabs ──
+function bpTab(id,el){
+  document.querySelectorAll('.bp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.bp-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('bp-'+id).classList.add('active');
+  if(id==='graph') setTimeout(drawGraph,50);
+  if(id==='wear') buildHeatmap();
+}
+
+// ── Graph ──
+const GD={p:[],v:[]};
+(function initG(){
+  for(let i=0;i<60;i++){
+    GD.p.push(46+Math.sin(i*.28)*5+(Math.random()-.5)*2.5);
+    GD.v.push(3.0+Math.sin(i*.52+1)*1.3+(Math.random()-.5)*.7);
+  }
+})();
+
+function drawGraph(){
+  const cvs=document.getElementById('graph-canvas');
+  const wrap=cvs.parentElement;
+  cvs.width=wrap.clientWidth;
+  cvs.height=wrap.clientHeight;
+  if(!cvs.width||!cvs.height) return;
+  const ctx=cvs.getContext('2d');
+  const W=cvs.width,H=cvs.height;
+  const pad={t:28,r:12,b:28,l:36};
+  const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#08111a';ctx.fillRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='#1c2333';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+(ch/4)*i;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+  }
+  // pressure line
+  function drawLine(data,color,min,max){
+    ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x=pad.l+(i/59)*cw;
+      const y=pad.t+ch-((v-min)/(max-min))*ch;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });ctx.stroke();
+  }
+  drawLine(GD.p,'#2dcfae',30,65);
+  drawLine(GD.v,'#f0b429',0,7);
+  // legend
+  ctx.font='10px monospace';ctx.textAlign='left';
+  ctx.fillStyle='#2dcfae';ctx.fillRect(pad.l,8,12,3);
+  ctx.fillStyle='#8b949e';ctx.fillText('압력 (kN)',pad.l+16,14);
+  ctx.fillStyle='#f0b429';ctx.fillRect(pad.l+90,8,12,3);
+  ctx.fillStyle='#8b949e';ctx.fillText('진동 (mm/s)',pad.l+106,14);
+  // x labels
+  ctx.textAlign='center';
+  ctx.fillText('-60s',pad.l,H-6);
+  ctx.fillText('-30s',pad.l+cw/2,H-6);
+  ctx.fillText('현재',pad.l+cw,H-6);
+}
+
+setInterval(()=>{
+  GD.p.shift();GD.p.push(46+Math.sin(Date.now()*.0009)*5+(Math.random()-.5)*2);
+  GD.v.shift();GD.v.push(3.0+Math.sin(Date.now()*.0018)*1.3+(Math.random()-.5)*.6);
+  const lp=GD.p[59],lv=GD.v[59];
+  document.getElementById('sv-pressure').textContent=lp.toFixed(1);
+  document.getElementById('sv-vib').textContent=lv.toFixed(1);
+  if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
+},1000);
+
+// ── Unity loader ──
+var canvas=document.querySelector('#unity-canvas');
+function unityShowBanner(msg,type){
+  var w=document.querySelector('#unity-warning');
+  var d=document.createElement('div');d.innerHTML=msg;w.appendChild(d);
+  if(type==='error') d.style='background:#ef4444;padding:8px 12px;font-size:12px;';
+  else{if(type==='warning') d.style='background:#f0b429;color:#000;padding:8px 12px;font-size:12px;';
+    setTimeout(()=>{try{w.removeChild(d);}catch(e){}},5000);}
+}
+var buildUrl='Build';
+var config={
+  dataUrl:buildUrl+'/unity_webgl.data',
+  frameworkUrl:buildUrl+'/unity_webgl.framework.js',
+  codeUrl:buildUrl+'/unity_webgl.wasm',
+  streamingAssetsUrl:'StreamingAssets',
+  companyName:'NEXTRO',productName:'BowlMillPrototype',productVersion:'1.0',
+  showBanner:unityShowBanner
+};
+document.querySelector('#unity-loading-bar').style.display='flex';
+var sc=document.createElement('script');
+sc.src=buildUrl+'/unity_webgl.loader.js';
+sc.onload=()=>{
+  createUnityInstance(canvas,config,p=>{
+    document.querySelector('#unity-progress-bar-full').style.width=(100*p)+'%';
+  }).then(ui=>{
+    document.querySelector('#unity-loading-bar').style.display='none';
+    document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
+    document.getElementById('part-sel').style.display='flex';
+    // Auto-open roll tire panels on load
+    selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
+  }).catch(console.error);
+};
+document.body.appendChild(sc);
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
+});
+</script>
+</body>
 </html>
