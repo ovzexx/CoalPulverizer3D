@@ -63,8 +63,8 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
 /* ── Right panel ── */
 .right-panel{width:0;flex-shrink:0;background:#161b22;border-left:1px solid #30363d;overflow:hidden;transition:width .35s cubic-bezier(.25,.46,.45,.94);}
-.right-panel.open{width:310px;}
-.rp-inner{width:310px;height:100%;overflow-y:auto;padding:14px;}
+.right-panel.open{width:400px;}
+.rp-inner{width:400px;height:100%;overflow-y:auto;padding:14px;}
 
 /* Wear heatmap bars (right panel) */
 .hm-bar-row{margin-bottom:10px;}
@@ -133,11 +133,11 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 /* ── Drawing tab ── */
 .drawing-box{flex:1;display:flex;flex-direction:column;min-width:0;}
 .drawing-svg-wrap{flex:1;background:#08111a;border:1px solid #21262d;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden;}
-.zone-sidebar{width:130px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;}
-.roller-toggle{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
-.rtbtn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:9px 11px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;}
+.zone-sidebar{width:165px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;}
+.roller-toggle{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.rtbtn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:12px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;transition:all .2s;display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;}
 .rtbtn.active,.rtbtn:hover{border-color:#2dcfae;color:#2dcfae;background:rgba(45,207,174,.1);}
-.rtbtn-badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;flex-shrink:0;}
+.rtbtn-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;flex-shrink:0;}
 #zone-list{font-size:11px;flex:1;overflow-y:auto;}
 #zone-list::-webkit-scrollbar{width:3px;}
 #zone-list::-webkit-scrollbar-thumb{background:#30363d;}
@@ -145,18 +145,10 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 .zone-bar-mini{width:36px;height:3px;background:#21262d;border-radius:1px;overflow:hidden;display:inline-block;vertical-align:middle;}
 .zone-bar-fill{height:100%;border-radius:1px;}
 
-/* ── Mini graph widget (viewer overlay) ── */
-#mini-graph{
-  position:absolute;bottom:44px;right:10px;
-  width:234px;height:106px;
-  background:rgba(13,17,23,.88);
-  border:1px solid #21262d;border-radius:8px;
-  overflow:hidden;cursor:pointer;
-  backdrop-filter:blur(10px);z-index:4;
-  transition:border-color .2s,opacity .2s;
-}
-#mini-graph:hover{border-color:#30363d;opacity:.95;}
-#mini-graph-canvas{display:block;}
+/* ── 우측 패널 하단 미니 그래프 ── */
+.rp-graph-section{margin-top:14px;border-top:1px solid #21262d;padding-top:12px;}
+#rp-graph-canvas{width:100%;height:110px;display:block;background:#08111a;border:1px solid #21262d;border-radius:8px;cursor:pointer;}
+#rp-graph-canvas:hover{border-color:#30363d;}
 
 /* ── Wear tab ── */
 .heatmap-wrap{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;}
@@ -292,11 +284,6 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
         <button class="pbtn close-btn" onclick="closePanels()">✕ 닫기</button>
       </div>
 
-      <!-- 미니 그래프 위젯 (우측 하단 상시) -->
-      <div id="mini-graph" onclick="openGraphPanel()" title="클릭하면 상세 그래프 열림">
-        <canvas id="mini-graph-canvas" width="234" height="106"></canvas>
-      </div>
-
       <div id="unity-footer">
         <div id="unity-build-title">BowlMillPrototype · NEXTRO</div>
         <div id="unity-fullscreen-button"></div>
@@ -318,7 +305,7 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
           <div class="drawing-box">
             <div style="font-size:11px;color:#8b949e;margin-bottom:6px;">롤 타이어 단면도 (Roll Tire Cross-Section) — Zone 1: 내측(좁은 끝) → Zone 10: 외측(넓은 끝)</div>
             <div class="drawing-svg-wrap">
-              <svg id="rt-svg" viewBox="0 0 760 215" style="width:100%;height:100%;max-height:215px;">
+              <svg id="rt-svg" viewBox="60 0 600 215" style="width:100%;height:100%;max-height:215px;">
                 <defs>
                   <pattern id="egrid" width="20" height="20" patternUnits="userSpaceOnUse">
                     <path d="M20 0L0 0 0 20" fill="none" stroke="#0d1f2f" stroke-width=".5"/>
@@ -426,7 +413,7 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
           <!-- Zone detail sidebar -->
           <div class="zone-sidebar">
-            <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">롤러 선택</div>
+            <div style="font-size:10px;color:#8b949e;margin-bottom:6px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;">롤러 선택</div>
             <div class="roller-toggle">
               <button class="rtbtn active" onclick="setRoller('b-1',this)" id="rtbtn-b1">
                 <span>b-1</span><span class="rtbtn-badge" id="rtbadge-b1"></span>
@@ -438,9 +425,7 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
                 <span>b-3</span><span class="rtbtn-badge" id="rtbadge-b3"></span>
               </button>
             </div>
-            <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">롤러: <span id="sel-roller-lbl" style="color:#2dcfae;font-weight:700;">b-1</span></div>
-            <div style="font-size:10px;color:#8b949e;margin-bottom:2px;">존별 마모율</div>
-            <div id="zone-list"></div>
+            <div style="font-size:9px;color:#484f58;text-align:center;margin-top:4px;">선택: <span id="sel-roller-lbl" style="color:#2dcfae;">b-1</span></div>
           </div>
         </div>
 
@@ -602,6 +587,14 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
             <div class="mc-unit">rpm</div>
           </div>
         </div>
+      <!-- 우측 패널 하단 실시간 그래프 -->
+      <div class="rp-graph-section">
+        <div class="sec-label" style="margin-top:0;margin-bottom:7px;">실시간 운전 상태</div>
+        <canvas id="rp-graph-canvas" onclick="openGraphPanel()" title="클릭하면 상세 그래프 열림"></canvas>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:10px;color:#2dcfae;">압력: <strong id="rp-pressure">—</strong> kN</span>
+          <span style="font-size:10px;color:#f0b429;">진동: <strong id="rp-vib">—</strong> mm/s</span>
+        </div>
       </div>
 
     </div>
@@ -650,6 +643,20 @@ function updateSvgOverlay(){
       `${ZX[i]},${TY[i]} ${ZX[i+1]},${TY[i+1]} ${ZX[i+1]},${BY} ${ZX[i]},${BY}`);
     poly.setAttribute('fill',wearColor(p));
     g.appendChild(poly);
+
+    // 각 zone 중앙에 % 표기
+    const cx=(ZX[i]+ZX[i+1])/2;
+    const topAvg=(TY[i]+TY[i+1])/2;
+    const cy=(topAvg+BY)/2+4;
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',cy);
+    txt.setAttribute('text-anchor','middle');
+    txt.setAttribute('font-size','10');
+    txt.setAttribute('font-weight','700');
+    txt.setAttribute('font-family','monospace');
+    txt.setAttribute('fill',p>=50?'#fff':'rgba(255,255,255,.9)');
+    txt.textContent=p+'%';
+    g.appendChild(txt);
   });
 }
 
@@ -835,7 +842,7 @@ window.onUnityPartSelected = function(partId) {
     if(rollBtn)rollBtn.classList.add('active');
     document.getElementById('right-panel').classList.add('open');
     document.getElementById('bottom-panel').classList.add('open');
-    setTimeout(()=>{updateAlertBanner();buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();updateRollerBadges();},360);
+    setTimeout(()=>{updateAlertBanner();buildHeatmap();buildRpHeatmap();updateSvgOverlay();updateZoneList();drawGraph();updateRollerBadges();drawRpGraph();},360);
   }
 };
 
@@ -904,38 +911,37 @@ function drawGraph(){
   ctx.fillText('현재',pad.l+cw,H-6);
 }
 
-// ── 미니 그래프 (뷰어 우측 하단 상시) ──
-function drawMiniGraph(){
-  const cvs=document.getElementById('mini-graph-canvas');
-  if(!cvs) return;
-  const W=234,H=106;
+// ── 우측 패널 하단 실시간 그래프 ──
+function drawRpGraph(){
+  const cvs=document.getElementById('rp-graph-canvas');
+  if(!cvs||!cvs.offsetParent) return;
+  const W=cvs.offsetWidth||370,H=110;
   cvs.width=W;cvs.height=H;
   const ctx=cvs.getContext('2d');
-  const pad={t:26,r:10,b:16,l:28};
+  const pad={t:8,r:8,b:14,l:28};
   const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
   ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#08111a';ctx.fillRect(0,0,W,H);
   // grid
-  ctx.strokeStyle='#1a2333';ctx.lineWidth=.7;
-  for(let i=0;i<=2;i++){const y=pad.t+(ch/2)*i;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();}
+  ctx.strokeStyle='#1a2333';ctx.lineWidth=.8;
+  for(let i=0;i<=3;i++){const y=pad.t+(ch/3)*i;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();}
   // lines
   function ml(data,color,mn,mx){
-    ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();
+    ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.beginPath();
     data.forEach((v,i)=>{const x=pad.l+(i/59)*cw,y=pad.t+ch-((v-mn)/(mx-mn))*ch;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
     ctx.stroke();
   }
   ml(GD.p,'#2dcfae',30,65);
   ml(GD.v,'#f0b429',0,7);
-  // header
-  ctx.font='bold 9px -apple-system,sans-serif';ctx.fillStyle='#484f58';ctx.textAlign='left';
-  ctx.fillText('실시간 운전 상태',pad.l,11);
-  // current values
+  // x labels
+  ctx.font='8px monospace';ctx.fillStyle='#484f58';ctx.textAlign='left';ctx.fillText('← 60s',pad.l,H-1);
+  ctx.textAlign='right';ctx.fillText('현재',pad.l+cw,H-1);
+  // update value labels
   const lp=GD.p[59],lv=GD.v[59];
-  ctx.font='bold 10px -apple-system,sans-serif';
-  ctx.fillStyle='#2dcfae';ctx.textAlign='right';ctx.fillText(lp.toFixed(1)+' kN',W-8,11);
-  ctx.fillStyle='#f0b429';ctx.fillText(lv.toFixed(1)+' mm/s',W-8,23);
-  // x label
-  ctx.font='8px monospace';ctx.fillStyle='#30363d';ctx.textAlign='left';ctx.fillText('← 60s',pad.l,H-3);
-  ctx.textAlign='right';ctx.fillText('현재',pad.l+cw,H-3);
+  const pe=document.getElementById('rp-pressure');
+  const ve=document.getElementById('rp-vib');
+  if(pe) pe.textContent=lp.toFixed(1);
+  if(ve) ve.textContent=lv.toFixed(1);
 }
 function openGraphPanel(){
   document.getElementById('bottom-panel').classList.add('open');
@@ -968,11 +974,11 @@ setInterval(()=>{
   document.getElementById('sv-pressure').textContent=lp.toFixed(1);
   document.getElementById('sv-vib').textContent=lv.toFixed(1);
   if(document.getElementById('bp-graph').classList.contains('active')) drawGraph();
-  drawMiniGraph();
+  drawRpGraph();
 },1000);
 
 // 초기 렌더
-setTimeout(drawMiniGraph,300);
+setTimeout(drawRpGraph,300);
 setTimeout(updateRollerBadges,100);
 
 // ── Unity loader ──
