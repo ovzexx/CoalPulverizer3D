@@ -63,8 +63,8 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
 /* ── Right panel ── */
 .right-panel{width:0;flex-shrink:0;background:#161b22;border-left:1px solid #30363d;overflow:hidden;transition:width .35s cubic-bezier(.25,.46,.45,.94);}
-.right-panel.open{width:400px;}
-.rp-inner{width:400px;height:100%;overflow-y:auto;padding:14px;}
+.right-panel.open{width:480px;}
+.rp-inner{width:480px;height:100%;overflow-y:auto;padding:14px;}
 
 /* Wear heatmap bars (right panel) */
 .hm-bar-row{margin-bottom:10px;}
@@ -549,12 +549,19 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
       <div class="sec-label">마모 히트맵 — Zone 1~10</div>
       <div id="rp-heatmap"></div>
 
-      <!-- ④ 운전 변수 (접기/펼치기) -->
-      <div class="sec-label" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="toggleOpVars()">
-        <span>운전 변수</span>
-        <span id="opvars-arrow" style="font-size:10px;color:#484f58;">▼ 펼치기</span>
+      <!-- ④ 실시간 그래프 (상시 표시) -->
+      <div class="rp-graph-section">
+        <div class="sec-label" style="margin-top:0;margin-bottom:7px;">실시간 운전 상태</div>
+        <canvas id="rp-graph-canvas" onclick="openGraphPanel()" title="클릭하면 상세 그래프 열림"></canvas>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;">
+          <span style="font-size:10px;color:#2dcfae;">압력: <strong id="rp-pressure">—</strong> kN</span>
+          <span style="font-size:10px;color:#f0b429;">진동: <strong id="rp-vib">—</strong> mm/s</span>
+        </div>
       </div>
-      <div id="opvars-grid" style="display:none;">
+
+      <!-- ⑤ 운전 변수 -->
+      <div class="sec-label">운전 변수</div>
+      <div id="opvars-grid">
         <div class="metric-grid">
           <div class="metric-card">
             <div class="mc-label">부하</div>
@@ -586,14 +593,6 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
             <div class="mc-val" style="color:#e6edf3;" id="mv-rpm">24.5</div>
             <div class="mc-unit">rpm</div>
           </div>
-        </div>
-      <!-- 우측 패널 하단 실시간 그래프 -->
-      <div class="rp-graph-section">
-        <div class="sec-label" style="margin-top:0;margin-bottom:7px;">실시간 운전 상태</div>
-        <canvas id="rp-graph-canvas" onclick="openGraphPanel()" title="클릭하면 상세 그래프 열림"></canvas>
-        <div style="display:flex;justify-content:space-between;margin-top:5px;">
-          <span style="font-size:10px;color:#2dcfae;">압력: <strong id="rp-pressure">—</strong> kN</span>
-          <span style="font-size:10px;color:#f0b429;">진동: <strong id="rp-vib">—</strong> mm/s</span>
         </div>
       </div>
 
@@ -663,6 +662,7 @@ function updateSvgOverlay(){
 // ── Zone list sidebar ──
 function updateZoneList(){
   const el=document.getElementById('zone-list');
+  if(!el) return;
   el.innerHTML=WEAR[selRoller].map((p,i)=>`
     <div class="zone-row">
       <span style="color:#8b949e">Z${i+1}</span>
@@ -716,13 +716,7 @@ function showTip(e,title,body){
 function hideTip(){document.getElementById('tooltip').style.display='none';}
 
 // ── 운전변수 접기/펼치기 ──
-function toggleOpVars(){
-  const grid=document.getElementById('opvars-grid');
-  const arrow=document.getElementById('opvars-arrow');
-  const open=grid.style.display==='none';
-  grid.style.display=open?'block':'none';
-  arrow.textContent=open?'▲ 접기':'▼ 펼치기';
-}
+function toggleOpVars(){ /* 운전변수 상시 표시 — 토글 없음 */ }
 
 // ── 경고 배너 업데이트 ──
 const RUL_HOURS={'b-1':3200,'b-2':420,'b-3':3800};
