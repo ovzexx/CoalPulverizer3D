@@ -25,3 +25,7 @@ crashlytics-build.properties
 ExportedObj/
 .vs/
 .vscode/
+
+# 빌드 아카이브 (docs/Build/ 에 실제 빌드 파일 있음)
+*.tar.gz
+*.zip
