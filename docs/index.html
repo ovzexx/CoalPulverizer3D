@@ -318,6 +318,18 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
                   <pattern id="ctx-hatch" x="0" y="0" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
                     <line x1="0" y1="0" x2="0" y2="7" stroke="#253040" stroke-width="1"/>
                   </pattern>
+                  <!-- 롤타이어 회전 sweep 애니메이션 -->
+                  <clipPath id="tire-clip">
+                    <polygon points="185,68 565,38 565,157 185,157"/>
+                  </clipPath>
+                  <linearGradient id="sweep-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#fff" stop-opacity="0"/>
+                    <stop offset="38%"  stop-color="#fff" stop-opacity="0"/>
+                    <stop offset="48%"  stop-color="#fff" stop-opacity="0.30"/>
+                    <stop offset="52%"  stop-color="#fff" stop-opacity="0.30"/>
+                    <stop offset="62%"  stop-color="#fff" stop-opacity="0"/>
+                    <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                  </linearGradient>
                   <marker id="arr" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto">
                     <polygon points="0,0 5,2.5 0,5" fill="#484f58"/>
                   </marker>
@@ -355,6 +367,11 @@ body{background:#0d1117;color:#e6edf3;font-family:-apple-system,'Noto Sans KR',s
 
                 <!-- ── Zone wear overlay (JS가 polygon으로 채움) ── -->
                 <g id="zone-svg-overlay" opacity=".82"></g>
+
+                <!-- ── 롤타이어 회전 sweep 오버레이 ── -->
+                <rect id="tire-sweep-rect" x="185" width="380" y="38" height="357"
+                      fill="url(#sweep-grad)" clip-path="url(#tire-clip)"
+                      pointer-events="none"/>
 
                 <!-- ── Zone dividers ── -->
                 <g stroke="#2dcfae" stroke-width=".8" stroke-dasharray="3,4" opacity=".55">
@@ -981,6 +998,32 @@ setInterval(()=>{
 // 초기 렌더
 setTimeout(drawRpGraph,300);
 setTimeout(updateRollerBadges,100);
+
+// ── 롤타이어 회전 sweep 애니메이션 (위→아래, RPM 연동) ──
+(function tireSweep(){
+  let phase=0, last=null;
+  const TIRE_TOP=38, TIRE_BOT=157;
+  const TIRE_H=TIRE_BOT-TIRE_TOP;   // 119px
+  const RECT_H=TIRE_H*3;            // 357px — 밴드가 위에서 들어와 아래로 나가는 여유
+  const TRAVEL=RECT_H+TIRE_H;       // 476px 총 이동량
+
+  function tick(ts){
+    if(!last) last=ts;
+    const dt=(ts-last)/1000; last=ts;
+    // mv-rpm = 분급기 속도(proxy). 시각적으로 보기 좋은 속도로 스케일
+    const rpm=parseFloat(document.getElementById('mv-rpm')?.textContent)||24.5;
+    const period=60/(Math.max(rpm,5)*0.8); // 초 단위 한 바퀴
+
+    phase=(phase+dt/period)%1;
+    const rect=document.getElementById('tire-sweep-rect');
+    if(rect){
+      const y=(TIRE_TOP-RECT_H)+phase*TRAVEL;
+      rect.setAttribute('y',y.toFixed(1));
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 // ── Unity loader ──
 var canvas=document.querySelector('#unity-canvas');
