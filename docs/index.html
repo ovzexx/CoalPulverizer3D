@@ -986,7 +986,7 @@ function unityShowBanner(msg,type){
     setTimeout(()=>{try{w.removeChild(d);}catch(e){}},5000);}
 }
 var buildUrl='Build';
-var bv='7';
+var bv='8';
 var config={
   dataUrl:buildUrl+'/unity_webgl.data?v='+bv,
   frameworkUrl:buildUrl+'/unity_webgl.framework.js?v='+bv,
@@ -997,7 +997,7 @@ var config={
 };
 document.querySelector('#unity-loading-bar').style.display='flex';
 var sc=document.createElement('script');
-sc.src=buildUrl+'/unity_webgl.loader.js';
+sc.src=buildUrl+'/unity_webgl.loader.js?v='+bv;
 sc.onload=()=>{
   createUnityInstance(canvas,config,p=>{
     document.querySelector('#unity-progress-bar-full').style.width=(100*p)+'%';
@@ -1007,6 +1007,8 @@ sc.onload=()=>{
     document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
     document.getElementById('part-sel').style.display='flex';
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
+    // Chrome: 캔버스에 포커스 선점 → 첫 클릭부터 Raycast 정상 동작
+    canvas.focus();
     setTimeout(()=>{ ui.SendMessage('Orbit Camera','SetOrbitFromJS','15,-10,20'); }, 500);
     setTimeout(sendWearToUnity, 800);
   }).catch(console.error);
