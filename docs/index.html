@@ -645,15 +645,16 @@ function updateSvgOverlay(){
     const cx=(ZX[i]+ZX[i+1])/2;
     const topAvg=(TY[i]+TY[i+1])/2;
     const cy=(topAvg+BY)/2+4;
-    // 수치 높을수록 더 강렬한 색상 — 낮은수치=흰색(안전), 높은수치=노랑(위험)
-    const ts = p>=80 ? {fill:'#ffef00',stroke:'#7a0000',sw:'0.9'}  // 위험: 경고황+진빨 외곽
-             : p>=60 ? {fill:'#ffef00',stroke:'#7a2800',sw:'0.7'}  // 경고: 경고황+진주황 외곽
-             : p>=30 ? {fill:'#ffffff',stroke:'#3a2000',sw:'0.4'}  // 주의: 흰색+진갈 외곽
-             :         {fill:'#ffffff',stroke:'#0b4033',sw:'0.3'}; // 정상: 흰색+진녹 외곽
+    // 수치 높을수록 글씨 크고 강렬하게
+    // 60-79%: 주황배경→흰글씨(대비 최대), 80%+: 빨간배경→경고황(최대 위험강조)
+    const ts = p>=80 ? {fill:'#ffef00',stroke:'#7a0000',sw:'1.0',sz:'15'} // 위험: 경고황+빨간외곽, 최대크기
+             : p>=60 ? {fill:'#ffffff',stroke:'#4a1500',sw:'0.7',sz:'14'} // 경고: 흰색+진갈외곽, 크게
+             : p>=30 ? {fill:'#ffffff',stroke:'#2a1800',sw:'0.4',sz:'13'} // 주의: 흰색, 보통크기
+             :         {fill:'#ffffff',stroke:'#0b4033',sw:'0.3',sz:'12'};// 정상: 흰색, 작게
     const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
     txt.setAttribute('x',cx);txt.setAttribute('y',cy);
     txt.setAttribute('text-anchor','middle');
-    txt.setAttribute('font-size','13');
+    txt.setAttribute('font-size',ts.sz);
     txt.setAttribute('font-weight','800');
     txt.setAttribute('font-family','monospace');
     txt.setAttribute('fill',ts.fill);
