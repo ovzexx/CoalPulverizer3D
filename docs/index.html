@@ -829,7 +829,7 @@ function sendWearToUnity() {
 // ── Unity → HTML 브리지 ──
 // Unity에서 부품 클릭 시 NotifyPartSelected(partId) jslib → 이 함수 호출
 window.onUnityPartSelected = function(partId) {
-  if(!partId){closePanels();return;}
+  if(!partId) return; // 빈 공간 클릭 시 패널 유지 (하이라이트만 해제)
   if(partId==='roll_assembly'){
     // 부품 선택 버튼 active 표시
     document.querySelectorAll('.part-sel .pbtn:not(.close-btn)').forEach(b=>b.classList.remove('active'));
@@ -1007,6 +1007,7 @@ sc.onload=()=>{
     document.querySelector('#unity-fullscreen-button').onclick=()=>ui.SetFullscreen(1);
     document.getElementById('part-sel').style.display='flex';
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
+    setTimeout(()=>{ ui.SendMessage('Orbit Camera','SetOrbitFromJS','15,-10,20'); }, 500);
     setTimeout(sendWearToUnity, 800);
   }).catch(console.error);
 };
