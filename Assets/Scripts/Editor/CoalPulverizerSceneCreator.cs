@@ -67,8 +67,8 @@ namespace CoalPulverizerEditor
             camera.fieldOfView = 40f;
             OrbitCamera orbit = cameraObject.AddComponent<OrbitCamera>();
             orbit.SetTarget(root.transform);
-            orbit.SetOrbit(12f, -35f, 38f);
-            cameraObject.transform.position = new Vector3(7.5f, 8.7f, -9.5f);
+            orbit.SetOrbit(15f, -35f, 20f);
+            cameraObject.transform.position = new Vector3(-8.6f, 8.0f, -11.6f);
             cameraObject.transform.LookAt(new Vector3(0f, 3.8f, 0f));
 
             GameObject key = new GameObject("Key Light");

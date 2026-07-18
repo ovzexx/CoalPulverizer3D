@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 
 namespace CoalPulverizer
@@ -5,9 +6,9 @@ namespace CoalPulverizer
     public sealed class OrbitCamera : MonoBehaviour
     {
         [SerializeField] private Transform target;
-        [SerializeField] private float distance = 12f;
+        [SerializeField] private float distance = 15f;
         [SerializeField] private float yaw = -35f;
-        [SerializeField] private float pitch = 38f;
+        [SerializeField] private float pitch = 20f;
         [SerializeField] private float rotateSpeed = 140f;
         [SerializeField] private float zoomSpeed = 4f;
 
@@ -44,6 +45,19 @@ namespace CoalPulverizer
             distance = newDistance;
             yaw = newYaw;
             pitch = newPitch;
+        }
+
+        // JS: unityInstance.SendMessage('Orbit Camera', 'SetOrbitFromJS', '15,-35,20')
+        public void SetOrbitFromJS(string csv)
+        {
+            string[] p = csv.Split(',');
+            if (p.Length >= 3 &&
+                float.TryParse(p[0], NumberStyles.Float, CultureInfo.InvariantCulture, out float d) &&
+                float.TryParse(p[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float y) &&
+                float.TryParse(p[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float pt))
+            {
+                distance = d; yaw = y; pitch = Mathf.Clamp(pt, -15f, 75f);
+            }
         }
     }
 }
