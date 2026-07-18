@@ -645,11 +645,11 @@ function updateSvgOverlay(){
     const cx=(ZX[i]+ZX[i+1])/2;
     const topAvg=(TY[i]+TY[i+1])/2;
     const cy=(topAvg+BY)/2+4;
-    // 구간별: 정상(민트) → 주의(호박) → 경고(주황) → 위험(빨강) 순으로 강조↑
+    // 수치 높을수록 더 강렬한 색상 — 낮은수치=흰색(안전), 높은수치=노랑(위험)
     const ts = p>=80 ? {fill:'#ffef00',stroke:'#7a0000',sw:'0.9'}  // 위험: 경고황+진빨 외곽
-             : p>=60 ? {fill:'#ffffff',stroke:'#7a2800',sw:'0.55'} // 경고: 흰색+진주황 외곽
-             : p>=30 ? {fill:'#fff0a0',stroke:'#5a3600',sw:'0.35'} // 주의: 연황+진갈 외곽
-             :         {fill:'#c8fff5',stroke:'#0b4033',sw:'0.25'};// 정상: 연민트+진녹 외곽
+             : p>=60 ? {fill:'#ffef00',stroke:'#7a2800',sw:'0.7'}  // 경고: 경고황+진주황 외곽
+             : p>=30 ? {fill:'#ffffff',stroke:'#3a2000',sw:'0.4'}  // 주의: 흰색+진갈 외곽
+             :         {fill:'#ffffff',stroke:'#0b4033',sw:'0.3'}; // 정상: 흰색+진녹 외곽
     const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
     txt.setAttribute('x',cx);txt.setAttribute('y',cy);
     txt.setAttribute('text-anchor','middle');
