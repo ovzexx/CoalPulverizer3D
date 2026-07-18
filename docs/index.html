@@ -1009,7 +1009,7 @@ sc.onload=()=>{
     selectPart('roll-tire', document.querySelector('.part-sel .pbtn'));
     // Chrome: 캔버스에 포커스 선점 → 첫 클릭부터 Raycast 정상 동작
     canvas.focus();
-    setTimeout(()=>{ ui.SendMessage('Orbit Camera','SetOrbitFromJS','15,-10,20'); }, 500);
+    setTimeout(()=>{ ui.SendMessage('Orbit Camera','SetOrbitFromJS','10,-10,25'); }, 500);
     setTimeout(sendWearToUnity, 800);
   }).catch(console.error);
 };
